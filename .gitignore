@@ -1,4 +1,8 @@
 # Claude Code local workspace scaffolding — not project artifacts
 .claude/
 _bmad/
-_bmad-output/
+
+# WDS design artifacts (Brief, Trigger Map, UX scenarios + page specs, design system,
+# design log) are the canonical UX deliverable Mimir + downstream phases consume.
+# They are project artifacts, not scratch — tracked in git as of 2026-05-25.
+# _bmad-output/ ← now tracked
