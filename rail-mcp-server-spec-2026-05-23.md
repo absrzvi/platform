@@ -7,7 +7,7 @@
 
 ## Overview
 
-The Rail MCP Server is a Nomad-built HTTP MCP endpoint exposing fleet data as typed tools for the Hermes Agent runtime (landside). Hermes calls these tools to answer Fleet Manager (Disponent) queries in natural language.
+The Rail MCP Server is a Nomad-built HTTP MCP endpoint exposing fleet data as typed tools for the Kondukt Agent runtime (landside). Kondukt calls these tools to answer Fleet Manager (Disponent) queries in natural language.
 
 **Stack:** Python 3.11, FastAPI, Pydantic v2, SQLAlchemy async, PostgreSQL + pgvector
 **Location in monorepo:** `rail-mcp-server/` (new subpackage, mirrors `cloud-backend/` patterns)
@@ -19,13 +19,13 @@ The Rail MCP Server is a Nomad-built HTTP MCP endpoint exposing fleet data as ty
 
 ### Removed from original oebb-brain spec
 - **`get_depot_schedule`** — REMOVED. Depot API schema unknown, BOOM descoped. Add when depot API is confirmed.
-- **`schedule_report`** — REMOVED. Orchestration concern, not data retrieval. Recurring reports belong in a separate scheduling service with its own lifecycle, not an MCP tool Hermes calls ad-hoc.
+- **`schedule_report`** — REMOVED. Orchestration concern, not data retrieval. Recurring reports belong in a separate scheduling service with its own lifecycle, not an MCP tool Kondukt calls ad-hoc.
 
 ---
 
 ### Tool 1 — `get_fleet_events`
 
-**Purpose:** Primary event feed. Hermes uses for incident triage and timeline reconstruction.
+**Purpose:** Primary event feed. Kondukt uses for incident triage and timeline reconstruction.
 
 **Parameters:**
 ```python
@@ -59,13 +59,13 @@ limit:       int = 50          # hard cap 200
 ```
 
 **Data source:** `events` table, PostgreSQL landside
-**Notes:** `truncated: true` signals Hermes to request a narrower time window. 72h max enforced server-side — no runaway queries.
+**Notes:** `truncated: true` signals Kondukt to request a narrower time window. 72h max enforced server-side — no runaway queries.
 
 ---
 
 ### Tool 2 — `get_fleet_summary`
 
-**Purpose:** Fleet health at a glance. Hermes uses for shift briefing or "how's the fleet right now."
+**Purpose:** Fleet health at a glance. Kondukt uses for shift briefing or "how's the fleet right now."
 
 **Parameters:**
 ```python
@@ -94,7 +94,7 @@ vehicle_ids: list[str] | None  # None = all active vehicles
 
 ### Tool 3 — `get_hafas_timetable`
 
-**Purpose:** Live schedule lookup. Hermes uses for delay questions and 48–72h forward planning window.
+**Purpose:** Live schedule lookup. Kondukt uses for delay questions and 48–72h forward planning window.
 
 **Parameters:**
 ```python
@@ -122,13 +122,13 @@ horizon_h:    int = 48         # hours forward from now, max 72
 ```
 
 **Data source:** ÖBB HAFAS API (single call per invocation)
-**Notes:** `data_freshness_ts` allows Hermes to caveat stale data. Unknown journey_id returns 200 with `stops: []`.
+**Notes:** `data_freshness_ts` allows Kondukt to caveat stale data. Unknown journey_id returns 200 with `stops: []`.
 
 ---
 
 ### Tool 4 — `search_fleet_events`
 
-**Purpose:** Semantic retrieval. Hermes uses when query is conceptual — "any door sealing issues last week."
+**Purpose:** Semantic retrieval. Kondukt uses when query is conceptual — "any door sealing issues last week."
 
 **Parameters:**
 ```python
@@ -191,7 +191,7 @@ severity:          Literal["INFO", "WARNING", "CRITICAL"]
 ```
 
 **Data source:** `intent_packets` table (historical maintenance records) + static cost lookup table
-**Notes:** Launch with `confidence: 0.0` and `cost_band: "unknown"` if cost seed data unavailable. Hermes must surface the confidence to Fleet Manager — never present low-confidence cost as authoritative.
+**Notes:** Launch with `confidence: 0.0` and `cost_band: "unknown"` if cost seed data unavailable. Kondukt must surface the confidence to Fleet Manager — never present low-confidence cost as authoritative.
 
 **Open:** Who owns the cost lookup table seed data? Nomad ops must provide before this tool returns non-unknown values.
 
@@ -199,7 +199,7 @@ severity:          Literal["INFO", "WARNING", "CRITICAL"]
 
 ### Tool 6 — `get_shift_handover` *(new)*
 
-**Purpose:** Shift continuity. Hermes uses when Disponent asks "what did last shift leave me."
+**Purpose:** Shift continuity. Kondukt uses when Disponent asks "what did last shift leave me."
 
 **Parameters:**
 ```python
@@ -230,7 +230,7 @@ vehicle_id:   str | None       # returns most recent handover for this vehicle
 
 ### Tool 7 — `get_ecm_audit_trail` *(new)*
 
-**Purpose:** ECM compliance audit. Hermes uses when supervisor asks whether a maintenance action was signed off, or to surface unsigned actions.
+**Purpose:** ECM compliance audit. Kondukt uses when supervisor asks whether a maintenance action was signed off, or to surface unsigned actions.
 
 **Parameters:**
 ```python
@@ -260,13 +260,13 @@ limit:       int = 20          # max 100
 ```
 
 **Data source:** `ecm_signoff_events` table (append-only, ordered by `signed_off_at DESC`)
-**Notes:** Read-only. Hermes cannot write sign-offs. Corrections appear as new rows with `supersedes_id`.
+**Notes:** Read-only. Kondukt cannot write sign-offs. Corrections appear as new rows with `supersedes_id`.
 
 ---
 
 ### Tool 8 — `get_intent_packet` *(new)*
 
-**Purpose:** Deep-dive on a specific incident. Hermes uses after `get_fleet_events` or `search_fleet_events` identifies a packet of interest.
+**Purpose:** Deep-dive on a specific incident. Kondukt uses after `get_fleet_events` or `search_fleet_events` identifies a packet of interest.
 
 **Parameters:**
 ```python
@@ -294,7 +294,7 @@ intent_packet_id: str          # UUID
 ```
 
 **Data source:** `intent_packets` table (IntentPacket v1.0.0 schema)
-**Notes:** Closes the gap between lean event list rows and full IntentPacket detail. Without this, Hermes has no drill-down path.
+**Notes:** Closes the gap between lean event list rows and full IntentPacket detail. Without this, Kondukt has no drill-down path.
 
 ---
 
@@ -475,9 +475,9 @@ AC-MCP-20  Coverage gate: pytest-cov --cov-fail-under=80.
 
 ---
 
-## Hermes Spike Tests — Pass/Fail
+## Kondukt Spike Tests — Pass/Fail
 
-**Setup:** Hermes runtime at `http://localhost:8765`. Rail MCP Server running. Test DB seeded via `tests/conftest.py`.
+**Setup:** Kondukt runtime at `http://localhost:8765`. Rail MCP Server running. Test DB seeded via `tests/conftest.py`.
 
 ---
 
@@ -485,7 +485,7 @@ AC-MCP-20  Coverage gate: pytest-cov --cov-fail-under=80.
 
 ```
 GIVEN  rail-mcp-server running
-WHEN   Hermes client calls GET /mcp/manifest
+WHEN   Kondukt client calls GET /mcp/manifest
 THEN   status_code == 200
 AND    len(body) == 9
 AND    {t["name"] for t in body} == {

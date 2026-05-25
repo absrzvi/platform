@@ -1,6 +1,6 @@
 # CLAUDE.md — Platform (Landside) Guidelines
 
-> **Workspace scope:** Landside fleet operations platform — Fleet Manager AI Interface, Depot Briefing PWA, Telematics control board, Rail MCP Server, ECM audit trail, Hermes BYOK integration.
+> **Workspace scope:** Landside fleet operations platform — Fleet Manager AI Interface, Depot Briefing PWA, Telematics control board, Rail MCP Server, ECM audit trail, Kondukt BYOK integration.
 >
 > **Companion workspace:** `C:\Users\AbbasRizvi\Documents\oebb-brain\` owns the onboard brain — Hailo inference, Conductor App PWA, IntentPacket schema and emission, edge resilience. Landside consumes IntentPackets from the brain; the brain does not consume landside output.
 >

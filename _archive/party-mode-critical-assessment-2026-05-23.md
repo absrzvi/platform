@@ -9,7 +9,7 @@
 
 Abbas is merging two repos into one unified Phase 2 product:
 - **oebb-agent** — Phase 1 built: Hailo-8 vision pipeline, Control Centre Dashboard (React/FastAPI/PostgreSQL/SQLite), 5 epics complete, CI green
-- **oebb-brain** — Designed but not built: Hailo-10H LLM layer (1–2B model, structured pipeline), Hermes BYOK harness, Fleet Manager UI, Rail MCP Server, intent packet JSON schema as onboard↔landside contract
+- **oebb-brain** — Designed but not built: Hailo-10H LLM layer (1–2B model, structured pipeline), Kondukt BYOK harness, Fleet Manager UI, Rail MCP Server, intent packet JSON schema as onboard↔landside contract
 
 **Hardware confirmed:** Two M.2 slots — Hailo-8 stays for vision, Hailo-10H added for LLM.
 
@@ -17,7 +17,7 @@ Abbas is merging two repos into one unified Phase 2 product:
 1. Conductor App — greenfield Android tablet, offline-first, active alerts + "Is it safe to continue?" LLM safety query + departure clearance + coach occupancy overview
 2. Depot Briefing Interface — mobile-first, BOOM work order integration, ECM Manager + electrical/mechanical/IT technicians, pre-arrival fault brief
 3. Landside Control Centre — extend existing React dashboard with intent packet display + LLM diagnosis + platform health monitoring
-4. Fleet Manager AI Interface — Hermes BYOK, 70/30 layout, natural language queries over fleet data
+4. Fleet Manager AI Interface — Kondukt BYOK, 70/30 layout, natural language queries over fleet data
 
 **Key USP:** LLM inference runs fully offline onboard.  
 **Priority stack:** Onboard crew first → Depot maintenance second → Landside reporting third.
@@ -40,7 +40,7 @@ If the vision pipeline detects an anomaly and the LLM simultaneously processes a
 ### BOOM integration has no fallback story
 What happens when BOOM is unreachable? What subset of fault data is available from the onboard event store without BOOM, and is that sufficient for a minimum viable briefing? Design to that baseline first.
 
-### Hermes BYOK has an implicit trust boundary problem
+### Kondukt BYOK has an implicit trust boundary problem
 BYOK means customer-supplied API keys hitting an LLM that has access to fleet telemetry. Threat model: prompt injection from the LLM response path back into fleet data display, and credential exposure if the key is ever logged or cached. Before UX stories spec the query interface: where does the API key live at runtime, does it ever touch the inference code path, and what sanitisation sits between LLM output and the UI render layer?
 
 ### What's missing before UX design stories begin
@@ -48,7 +48,7 @@ BYOK means customer-supplied API keys hitting an LLM that has access to fleet te
 2. Intent packet semantics document (lifecycle, versioning, staleness policy)
 3. Safety authority chain document (who can raise, dismiss, which system is authoritative)
 4. BOOM fallback design (minimum viable briefing without external integration)
-5. Hermes trust boundary spec (key storage, output sanitisation, audit trail)
+5. Kondukt trust boundary spec (key storage, output sanitisation, audit trail)
 
 ---
 
@@ -123,13 +123,13 @@ Must exist before any story goes to dev:
 
 Failure mode: Conductor App caches IntentPacket shape X. Brain emits shape Y. Cache deserialization fails silently on reconnect. Offline-first guarantee broken.
 
-### BLOCKER-2: 4 Hermes spikes unrun
+### BLOCKER-2: 4 Kondukt spikes unrun
 
 | Spike | Story failure if skipped |
 |---|---|
 | MCP startup error handling | Rail MCP Server story ships, Fleet Manager gets unhandled 500 on tool init |
 | SQLite concurrency under 10 sessions | Offline store corrupts under multi-tab or background sync |
-| Skills async model | Hermes blocks event loop; SSE to Control Centre drops |
+| Skills async model | Kondukt blocks event loop; SSE to Control Centre drops |
 | BYOK 429 handling | Fleet Manager hangs indefinitely on rate limit; no retry budget |
 
 Run all 4 before any Phase 2 story creation.
@@ -173,7 +173,7 @@ submit_work_order(unit_id: str, payload: WorkOrderRequest) -> WorkOrderResponse
 | # | Gate | Type |
 |---|---|---|
 | 1 | `IntentPacket` Pydantic schema merged to `shared/` | Hard blocker |
-| 2 | All 4 Hermes spikes run and findings documented | Hard blocker |
+| 2 | All 4 Kondukt spikes run and findings documented | Hard blocker |
 | 3 | BOOM API contract obtained (or story descoped to "BOOM unavailable" state) | Hard blocker |
 | 4 | Conductor App transport ADR filed and merged to `docs/adr/` | Hard blocker |
 | 5 | Rail MCP Server tool signatures frozen | Hard blocker |

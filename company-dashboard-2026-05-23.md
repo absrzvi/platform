@@ -147,7 +147,7 @@ TIME HORIZON:         6 months to fundable event. 12-18 months to fleet contract
 | Architecture doc | ❌ | Next step — bmad-create-architecture |
 | Epics & stories | ❌ | After architecture |
 | Phase 2 build | ❌ | After epics |
-| Pre-story spikes | ❌ | Hailo-10H load test, pgvector P99, Hermes ×4, dismissal arbitration |
+| Pre-story spikes | ❌ | Hailo-10H load test, pgvector P99, Kondukt ×4, dismissal arbitration |
 
 ---
 

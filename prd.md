@@ -14,10 +14,10 @@ splitFrom: prd-unified-2026-05-23 (see git history for combined version)
 classification:
   projectType: Landside fleet operations & telematics platform (web dashboard for situational awareness and planning; AI agent interface for fleet analytics; mobile depot briefing PWA for ECM compliance)
   domain: Rail operations — regulated landside (EU ECM Directive 2019/779, NIS2, GDPR). Safety-adjacent advisory only; no automated control commands.
-  complexity: High — multi-system integration (HAFAS, vendor diagnostic portals) + Hermes BYOK agent runtime + pgvector semantic search + append-only ECM audit. MVP is advisory-only — no automated dispatch. Action execution remains with the operator's existing systems (HAFAS, paper sign-off, radio). Phase 2 (post-pilot, gated on trust criteria) re-introduces dispatch.
+  complexity: High — multi-system integration (HAFAS, vendor diagnostic portals) + Kondukt BYOK agent runtime + pgvector semantic search + append-only ECM audit. MVP is advisory-only — no automated dispatch. Action execution remains with the operator's existing systems (HAFAS, paper sign-off, radio). Phase 2 (post-pilot, gated on trust criteria) re-introduces dispatch.
   projectContext: Greenfield landside platform; receives IntentPacket stream from oebb-brain (onboard) and from vendor telemetry sources. SAP/ServiceNow/BOOM integrations are post-MVP.
   deploymentModel: Single ÖBB instance (PoC); per-operator deployment at fleet rollout
-  aiPosture: Advisory-only in MVP — Hermes produces structured Recommended Action Objects; human reads and acts via existing operational systems; platform records the decision as a shadow audit trail for trust-building. Phase 2 (post-pilot) introduces platform-mediated dispatch with retained authoritative audit recording, gated on Phase 1 trust criteria.
+  aiPosture: Advisory-only in MVP — Kondukt produces structured Recommended Action Objects; human reads and acts via existing operational systems; platform records the decision as a shadow audit trail for trust-building. Phase 2 (post-pilot) introduces platform-mediated dispatch with retained authoritative audit recording, gated on Phase 1 trust criteria.
   mvpPhase: advisory-only
   phase2Trigger: trust-criteria-met-at-pilot-end
 ---
@@ -46,7 +46,7 @@ The landside platform **consumes** IntentPackets from the brain over MQTT and pe
 
 The platform unifies these surfaces around three roles:
 
-**Live decision support — Fleet Manager** *(primary persona — Roland Ruisz, ÖBB operations)* — the Disponent receives a real-time triage feed of fleet disruptions, each tagged with a cost-impact one-liner. Hermes (operator-owned BYOK LLM) generates Recommended Action Objects (RAOs) — structured proposals describing what should happen across multiple systems (HAFAS rotation update + work order creation), rendered as readable cards with step-by-step execution guidance. The Disponent executes via their existing systems (HAFAS direct, SAP direct); the platform records the action they took and the outcome as a shadow audit entry.
+**Live decision support — Fleet Manager** *(primary persona — Roland Ruisz, ÖBB operations)* — the Disponent receives a real-time triage feed of fleet disruptions, each tagged with a cost-impact one-liner. Kondukt (operator-owned BYOK LLM) generates Recommended Action Objects (RAOs) — structured proposals describing what should happen across multiple systems (HAFAS rotation update + work order creation), rendered as readable cards with step-by-step execution guidance. The Disponent executes via their existing systems (HAFAS direct, SAP direct); the platform records the action they took and the outcome as a shadow audit entry.
 
 **Pre-arrival compliance — ECM Manager** — the ECM 1 Manager receives a structured fault brief generated from the vehicle's IntentPacket history before docking. They sign off **on paper** per existing ÖBB process; the platform records their decision alongside the paper trail as a shadow audit entry — building the evidence that the platform's audit-trail capability is sound before Phase 2 promotes it to the authoritative record.
 
@@ -60,7 +60,7 @@ Every decision is made by a human and executed via the operator's existing syste
 
 **ECM audit trail** — not a log, but the regulatory compliance record under EU 2019/779. Append-only, IdP-bound, HMAC-signed, hash-chained, with `supersedes_id` for corrections. In MVP, the trail shadows the paper sign-off process; in Phase 2, it becomes the authoritative regulatory compliance record under EU 2019/779.
 
-**Hermes Recommended Action Objects (RAOs)** — the landside differentiator. Where competitor dashboards show data and require humans to translate it into actions across 4–7 systems, this platform's Hermes co-pilot produces structured multi-system action proposals as readable recommendation cards with step-by-step execution guidance. The Disponent reviews the recommendation, executes via existing systems, and logs the action taken back into the platform — building the recommendation→action→outcome dataset that gates Phase 2 dispatch capability.
+**Kondukt Recommended Action Objects (RAOs)** — the landside differentiator. Where competitor dashboards show data and require humans to translate it into actions across 4–7 systems, this platform's Kondukt co-pilot produces structured multi-system action proposals as readable recommendation cards with step-by-step execution guidance. The Disponent reviews the recommendation, executes via existing systems, and logs the action taken back into the platform — building the recommendation→action→outcome dataset that gates Phase 2 dispatch capability.
 
 **Vendor warranty leverage** — the platform's end-to-end network path visibility resolves "is it our landside or the manufacturer's hardware" disputes during the Probebetrieb commissioning phase, where a single telematics breakdown can freeze formal sign-off. This is a non-obvious commercial wedge for the Telematics Sub-Project Manager persona.
 
@@ -80,10 +80,10 @@ Every decision is made by a human and executed via the operator's existing syste
 
 - **Project Type:** Landside fleet operations and telematics platform — web dashboard, mobile PWA, AI agent interface
 - **Domain:** Rail operations — regulated landside (EU ECM Directive 2019/779, NIS2, GDPR)
-- **Complexity:** High — multi-system integration + Hermes BYOK + pgvector + append-only audit
+- **Complexity:** High — multi-system integration + Kondukt BYOK + pgvector + append-only audit
 - **Project Context:** Greenfield landside; consumes IntentPackets from oebb-brain
 - **Deployment Model:** Single ÖBB instance (PoC); per-operator deployment at fleet rollout
-- **AI Posture:** Advisory-only in MVP — Hermes produces structured Recommended Action Objects; human reads and acts via existing operational systems; platform records the decision as a shadow audit trail for trust-building. Phase 2 (post-pilot) introduces platform-mediated dispatch with retained authoritative audit recording, gated on Phase 1 trust criteria.
+- **AI Posture:** Advisory-only in MVP — Kondukt produces structured Recommended Action Objects; human reads and acts via existing operational systems; platform records the decision as a shadow audit trail for trust-building. Phase 2 (post-pilot) introduces platform-mediated dispatch with retained authoritative audit recording, gated on Phase 1 trust criteria.
 
 ---
 
@@ -124,7 +124,7 @@ The following conditions pause the pilot pending investigation. Roland Ruisz (op
 | ECM shadow audit write failure | Unresolved >24h | Halt platform-side shadow recording; ECM paper process continues unaffected; flag to Martin Lerch for infrastructure review |
 | Shadow audit-trail divergence | >2 mismatches per pilot week between paper and platform records | Platform-side root-cause investigation; if divergence persists, Phase 2 readiness assessment downgrades |
 | pgvector semantic search unavailable | Keyword fallback active >48h continuous | Flag to Martin Lerch; infrastructure review required |
-| Hermes BYOK API unavailable | >24h sustained 429 / 5xx | Disable Recommended Action Object generation; manual triage only |
+| Kondukt BYOK API unavailable | >24h sustained 429 / 5xx | Disable Recommended Action Object generation; manual triage only |
 | Rail MCP Server tool failure | Any single tool unavailable >12h | Surface "Data source unavailable" to Fleet Manager; review by Nomad ops |
 | Landside ingestion gap from brain | >72h without IntentPacket sync on any active train | Coordinate with brain team — root cause may be onboard or transport |
 
@@ -154,14 +154,14 @@ Three landside surfaces, delivered in priority order:
 
 1. **Depot Briefing Interface** — PWA, mobile-first. Role-filtered fault feed (ECM Manager / Electrical / Mechanical / IT), ECM 1 blocking authorisation state, append-only sign-off with IdP-bound identity, pre-arrival brief generated from IntentPackets. BOOM integration descoped — structured export/copy for manual BOOM entry.
 
-2. **Fleet Manager AI Interface** — The primary landside control surface. Hermes BYOK, Rail MCP Server (9 tools), three entry states (triage 70/30, crisis full-width, trend 30/70), pgvector semantic search over incident summaries, cost-impact one-liner per triage card, shift handover summary, relay card for Dispatcher forwarding, Hermes-generated Recommended Action Object cards with three-tier confidence visual grammar.
+2. **Fleet Manager AI Interface** — The primary landside control surface. Kondukt BYOK, Rail MCP Server (9 tools), three entry states (triage 70/30, crisis full-width, trend 30/70), pgvector semantic search over incident summaries, cost-impact one-liner per triage card, shift handover summary, relay card for Dispatcher forwarding, Kondukt-generated Recommended Action Object cards with three-tier confidence visual grammar.
 
-3. **Telematics Project Management surfaces** *(from Gemini research)* — the **ÖBB Unified Telematics Control Panel**: a single workspace presenting three linked zones to the Teil-Projektleitung Telematik persona. Zone 1 (Macro Situational Awareness): fleet compatibility matrix + geospatial telemetry overlay. Zone 2 (Micro Visual Train Topology): SVG train anatomy + inline metadata drawers per hardware node. Zone 3 (Hermes AI Co-Pilot Console): chat + Proactive Recommendation Cards in Recommended Action Object format. Zones are bound by interaction: selecting a vehicle in Zone 1 opens its topology in Zone 2; a fault detected in Zone 1 or 2 generates a Proactive Recommendation Card in Zone 3. Use cases covered: trial run validation (Probebetrieb), cross-fleet modernization monitoring (DOSTO Neu pilot; Cityjet Enzo onboarded on rollout success — both are new Stadler deliveries, not retrofits), OTA software rollout with canary + drift detection, root-cause warranty triage, digital twin / cross-entity validation after workshop hardware swaps, multi-vehicle procurement spec export (Lastenheft), closed-loop trust recovery with per-alert-type accuracy metrics, ROI analysis. **Scope locked as MVP** — FR36–FR50 below are the binding contract for this surface.
+3. **Telematics Project Management surfaces** *(from Gemini research)* — the **ÖBB Unified Telematics Control Panel**: a single workspace presenting three linked zones to the Teil-Projektleitung Telematik persona. Zone 1 (Macro Situational Awareness): fleet compatibility matrix + geospatial telemetry overlay. Zone 2 (Micro Visual Train Topology): SVG train anatomy + inline metadata drawers per hardware node. Zone 3 (Kondukt AI Co-Pilot Console): chat + Proactive Recommendation Cards in Recommended Action Object format. Zones are bound by interaction: selecting a vehicle in Zone 1 opens its topology in Zone 2; a fault detected in Zone 1 or 2 generates a Proactive Recommendation Card in Zone 3. Use cases covered: trial run validation (Probebetrieb), cross-fleet modernization monitoring (DOSTO Neu pilot; Cityjet Enzo onboarded on rollout success — both are new Stadler deliveries, not retrofits), OTA software rollout with canary + drift detection, root-cause warranty triage, digital twin / cross-entity validation after workshop hardware swaps, multi-vehicle procurement spec export (Lastenheft), closed-loop trust recovery with per-alert-type accuracy metrics, ROI analysis. **Scope locked as MVP** — FR36–FR50 below are the binding contract for this surface.
 
 **Infrastructure MVP:**
 - `rail-mcp-server/` — 9-tool HTTP MCP endpoint (spec frozen — see `rail-mcp-server-spec-2026-05-23.md`)
 - `ecm_signoff_events` + `shift_handovers` tables in PostgreSQL
-- 4 Hermes spikes run and findings documented (pre-story gate)
+- 4 Kondukt spikes run and findings documented (pre-story gate)
 - pgvector fallback ranking strategy defined and spiked before Fleet Manager stories
 - IntentPacket landside ingest endpoint — REST + SSE from oebb-brain MQTT broker, idempotent on `packet_id`
 
@@ -177,11 +177,11 @@ Three landside surfaces, delivered in priority order:
 
 ### Vision (Future)
 
-- Hermes agents that proactively surface fleet patterns without query — push-based fleet intelligence
+- Kondukt agents that proactively surface fleet patterns without query — push-based fleet intelligence
 - ECM audit trail integration with ÖBB's internal compliance documentation system
 - Lastenheft procurement requirements export — clauses generated from cumulative operational evidence (descoped from MVP; format, consumer, and failure threshold to be defined post-pilot)
 - Multi-operator rail network deployment (non-ÖBB carriers)
-- Configuration drift auto-remediation — Hermes proposes patch deployment to fleet trains showing drift
+- Configuration drift auto-remediation — Kondukt proposes patch deployment to fleet trains showing drift
 
 ---
 
@@ -191,8 +191,8 @@ Three landside surfaces, delivered in priority order:
 |---|---|---|
 | PostgreSQL unavailable | Shadow audit-trail writes queue locally at depot, sync on reconnect. Paper sign-off process continues normally — platform unavailability does not block ECM clearance. Fleet Manager AI Interface shows stale data with timestamp. Rail MCP Server returns 503 with `recoverable: true`. | Depot assumed to have fixed network — extended outage triggers ops alert. Shadow audit-trail writes resume on reconnect; append-only guarantee preserved. |
 | pgvector index failure | Fleet Manager semantic search degrades to keyword fallback ranking. No silent failure — UI labels results "Keyword search active". | pgvector restart clears index; re-index from `incident_summary` embeddings. Spike required pre-Fleet Manager stories to define fallback behaviour and re-index SLA. |
-| Hermes BYOK API unavailable (429 / 5xx) | Fleet Manager AI chat shows "Fleet intelligence temporarily unavailable". Triage and crisis views remain fully functional — they do not depend on Hermes. Retry with exponential backoff + budget cap. | BYOK 429 handling is Hermes spike 4. |
-| Rail MCP Server tool failure | Hermes receives structured error `{error, detail, recoverable}`. Recoverable errors retried once. Non-recoverable surfaced to Fleet Manager as "Data source unavailable for [tool name]". | Each tool is independently recoverable. |
+| Kondukt BYOK API unavailable (429 / 5xx) | Fleet Manager AI chat shows "Fleet intelligence temporarily unavailable". Triage and crisis views remain fully functional — they do not depend on Kondukt. Retry with exponential backoff + budget cap. | BYOK 429 handling is Kondukt spike 4. |
+| Rail MCP Server tool failure | Kondukt receives structured error `{error, detail, recoverable}`. Recoverable errors retried once. Non-recoverable surfaced to Fleet Manager as "Data source unavailable for [tool name]". | Each tool is independently recoverable. |
 | Brain → landside ingest gap | IntentPacket sync paused. MQTT retain=True surfaces only the last-known packet on reconnect — gap-period packets are not on the MQTT broker. Fleet Manager and Telematics surfaces show staleness indicator on affected vehicles based on sequence-number or heartbeat detection (FR45). Audit trail gap flagged with last-known timestamp. | Brain replays unacknowledged packets via its dedicated replay channel on reconnect; landside acknowledges per `packet_id` (idempotent insert). Replay-channel spec is brain-owned. Until replay completes, affected surfaces remain in staleness state — no false-fresh data. |
 | Recommended Action Object — outcome reconciliation gap | If the operator logs that they executed an RAO but the platform cannot verify the outcome via downstream system polling (HAFAS-state check, SAP-state check), platform marks the RAO outcome as 'self-reported unverified' in the shadow trail. Disponent surfaces this and provides clarification. | Subsequent polling cycles attempt reconciliation; persistent unverified outcomes flagged for Phase 2 readiness review. |
 
@@ -230,9 +230,9 @@ Three landside surfaces, delivered in priority order:
 
 **The modal fires.** "Unit 4722 — Door Motor Fault, Car 4. Active unresolved incident. View?" He taps yes. Full-width crisis view. AI chat pre-seeded: "Unit 4722 door motor fault detected at 06:14. Conductor resolved manually at 07:14. Vehicle cleared by ECM at 06:08. Replacement unit available: Unit 4819."
 
-**Stefan queries.** "What does deploying 4819 cost versus keeping 4722 on route?" Hermes calls `get_maintenance_cost_estimate(unit_id="4722", replacement_unit_id="4819")`. Response in 2.1 seconds: "Replacing with Unit 4819 adds ~€2,400 estimated maintenance overhead. Confidence: medium. Rationale: 4819 last serviced 34 days ago, approaching mileage threshold." The cost one-liner was already in the triage card before he typed the question.
+**Stefan queries.** "What does deploying 4819 cost versus keeping 4722 on route?" Kondukt calls `get_maintenance_cost_estimate(unit_id="4722", replacement_unit_id="4819")`. Response in 2.1 seconds: "Replacing with Unit 4819 adds ~€2,400 estimated maintenance overhead. Confidence: medium. Rationale: 4819 last serviced 34 days ago, approaching mileage threshold." The cost one-liner was already in the triage card before he typed the question.
 
-**Recommended Action Object.** Stefan asks: "What does it take to redeploy 4819 to take 4722's slot on the next rotation?" Hermes generates a Recommended Action Object: `{action_type: "FLEET_REDEPLOYMENT", operations: [{system: HAFAS, method: rotation_update, payload: {rotation_id: ..., effective_at: '22:15', replacement_unit: '4819'}}], justification: "..."}`. Rendered as a readable recommendation card with the exact HAFAS payload Stefan needs to enter, a step-by-step procedure ("1. Open HAFAS, 2. Navigate to Rotation 22:15, 3. Replace 4722 with 4819, 4. Confirm with conductor by radio"), and a "Mark executed" button. *(SAP work order routing is post-MVP. In MVP the platform does not dispatch — Stefan executes via HAFAS himself.)*
+**Recommended Action Object.** Stefan asks: "What does it take to redeploy 4819 to take 4722's slot on the next rotation?" Kondukt generates a Recommended Action Object: `{action_type: "FLEET_REDEPLOYMENT", operations: [{system: HAFAS, method: rotation_update, payload: {rotation_id: ..., effective_at: '22:15', replacement_unit: '4819'}}], justification: "..."}`. Rendered as a readable recommendation card with the exact HAFAS payload Stefan needs to enter, a step-by-step procedure ("1. Open HAFAS, 2. Navigate to Rotation 22:15, 3. Replace 4722 with 4819, 4. Confirm with conductor by radio"), and a "Mark executed" button. *(SAP work order routing is post-MVP. In MVP the platform does not dispatch — Stefan executes via HAFAS himself.)*
 
 **The decision.** Stefan reviews the recommendation. The HAFAS payload matches his judgment. He opens HAFAS in his other tab, executes the rotation update himself, confirms with the conductor by radio, then returns to the platform and taps "Mark executed — confirmed via HAFAS at 07:24". The platform records: the RAO that was generated, Stefan's review action, his execution confirmation, and (via background polling against HAFAS read endpoints) the HAFAS-state change that verifies the rotation went through. All as shadow audit entries — none of them authoritative on their own, but together a complete chain of recommendation→decision→action→outcome.
 
@@ -250,7 +250,7 @@ Three landside surfaces, delivered in priority order:
 
 **The action.** Ana taps "Forward to Conductor." The relay card is pushed to the conductor's PWA notification (via brain). Ana taps "Copy" and pastes it into the PA system announcement. She did not rewrite anything. She did not call the conductor. Thirty seconds from alert to passenger announcement.
 
-**The new reality.** The relay card was generated by Hermes from the IntentPacket `incident_summary`. Ana's job is coordination, not translation. The platform handled the translation.
+**The new reality.** The relay card was generated by Kondukt from the IntentPacket `incident_summary`. Ana's job is coordination, not translation. The platform handled the translation.
 
 *Capabilities revealed: Relay card component, LLM-generated passenger-safe language, copy-to-clipboard, forward-to-conductor push notification, Dispatcher coordination loop.*
 
@@ -294,13 +294,13 @@ Three landside surfaces, delivered in priority order:
 
 **Before the platform.** Lukas would have spent two days pulling logs from the vendor diagnostic portal, cross-referencing against ÖBB's PostgreSQL reservation service uptime in Power BI, exporting timestamps to Excel, and writing a Change Request rebuttal email. Likely outcome: Stadler holds the line, and the dispute escalates to procurement.
 
-**Now.** Lukas opens the Telematics control board. He filters the fleet compatibility matrix to the affected units. He clicks one unit, opens the SVG train topology, and selects the reservation screen node. Inline drawer surfaces: MAC address, firmware version, last 24h packet trace from VLAN 6 (reservations), and the corresponding landside reservation service response latencies during the failure window. Hermes is already on the case in zone 3: "Reservation service response P99 was 187ms during all three failure windows. Bus controller memory utilisation crossed 94% in the same window on all three units. Pattern consistent with onboard memory leak, not landside latency."
+**Now.** Lukas opens the Telematics control board. He filters the fleet compatibility matrix to the affected units. He clicks one unit, opens the SVG train topology, and selects the reservation screen node. Inline drawer surfaces: MAC address, firmware version, last 24h packet trace from VLAN 6 (reservations), and the corresponding landside reservation service response latencies during the failure window. Kondukt is already on the case in zone 3: "Reservation service response P99 was 187ms during all three failure windows. Bus controller memory utilisation crossed 94% in the same window on all three units. Pattern consistent with onboard memory leak, not landside latency."
 
-**The action.** Lukas approves a Recommended Action Object: "Package evidence dump for warranty claim — Stadler ticket #SR-2026-0517." Hermes assembles the timestamp-correlated logs and generates a structured warranty claim document. Lukas reviews, downloads the PDF, and attaches it to the Stadler ticket himself. Two days later, Stadler authorises the bus controller swap under warranty.
+**The action.** Lukas approves a Recommended Action Object: "Package evidence dump for warranty claim — Stadler ticket #SR-2026-0517." Kondukt assembles the timestamp-correlated logs and generates a structured warranty claim document. Lukas reviews, downloads the PDF, and attaches it to the Stadler ticket himself. Two days later, Stadler authorises the bus controller swap under warranty.
 
 **The new reality.** What used to be a multi-day forensic exercise across four systems is now a 20-minute investigation with platform-generated evidence. The vendor lock-in dynamic shifts because ÖBB now has independent diagnostic visibility.
 
-*Capabilities revealed: Macro fleet compatibility matrix, micro SVG train topology with metadata drawers (IntentPacket + local registry in MVP), Hermes correlation across landside + onboard telemetry, warranty evidence packaging Recommended Action Object, vendor-facing structured export, **operator-submitted to vendor systems**.*
+*Capabilities revealed: Macro fleet compatibility matrix, micro SVG train topology with metadata drawers (IntentPacket + local registry in MVP), Kondukt correlation across landside + onboard telemetry, warranty evidence packaging Recommended Action Object, vendor-facing structured export, **operator-submitted to vendor systems**.*
 
 ---
 
@@ -322,7 +322,7 @@ Three landside surfaces, delivered in priority order:
 
 **The scenario.** 09:14. Onboard brain inference stalls on a specific train — the brain's IntentPacket emission has paused for 80 seconds. The landside platform's MQTT consumer keeps the last retained packet but no new ones arrive.
 
-**What Stefan sees.** In the Fleet Manager triage view, the fleet card for Train 4712 shows a staleness indicator — last updated timestamp, amber border. He queries Hermes: "What is the current status of Train 4712?" Hermes calls `get_fleet_summary`. The Rail MCP Server responds with `data_freshness_ts` showing 94 seconds ago. Hermes surfaces this: "Last known status 94 seconds ago — onboard inference delayed. Data may not reflect current state." Stefan waits. He does not act on stale data.
+**What Stefan sees.** In the Fleet Manager triage view, the fleet card for Train 4712 shows a staleness indicator — last updated timestamp, amber border. He queries Kondukt: "What is the current status of Train 4712?" Kondukt calls `get_fleet_summary`. The Rail MCP Server responds with `data_freshness_ts` showing 94 seconds ago. Kondukt surfaces this: "Last known status 94 seconds ago — onboard inference delayed. Data may not reflect current state." Stefan waits. He does not act on stale data.
 
 **MCP timeout.** Stefan asks for the cost estimate on a redeployment. The Rail MCP Server call to `get_maintenance_cost_estimate` times out after 8 seconds. The triage card shows: "Cost estimate unavailable — data source timeout." Stefan makes the redeployment recommendation review **without the cost figure**, executes the rotation in HAFAS himself, and logs his action. The platform records his decision with a flag: cost data unavailable at decision time. Phase 2 trust evaluation tracks whether decisions made under degraded data conditions diverge in outcome from decisions made with full data.
 
@@ -372,7 +372,7 @@ Three landside surfaces, delivered in priority order:
 | Pilot evidence dashboard + prevented delay-minutes panel | Journey 5 |
 | Fleet compatibility matrix + geospatial overlay | Journey 6 |
 | SVG train topology + inline metadata drawers (IntentPacket + local registry; SAP post-MVP) | Journey 6 *(scope assessment required — see Journey 6 note)* |
-| Hermes correlation across landside + onboard telemetry | Journey 6 |
+| Kondukt correlation across landside + onboard telemetry | Journey 6 |
 | Warranty evidence packaging | Journey 6 |
 | OTA rollout monitoring — per-unit firmware/version from IntentPackets, outlier surfacing, staleness indicator | Journey 7 |
 | Configuration drift detection (local registry in MVP; SAP asset registry post-MVP) | Journey 7 |
@@ -416,7 +416,7 @@ Three landside surfaces, delivered in priority order:
 **NIS2**
 - Platform classified as critical infrastructure operator — ÖBB's NIS2 classification applies
 - Incident reporting obligations: material cybersecurity incidents must be reported following the NIS2 Article 23 timeline — **early warning within 24h** of becoming aware, **incident notification within 72h**, **final report within 1 month**. **Operational owner: ÖBB IT Security (ÖBB PV and BCC departments** — not Martin Lerch's org; Martin Lerch is ÖBB Technische Services). The platform's obligation is to emit structured security-incident events with metadata sufficient to support all three reporting stages (authentication anomaly, unauthorised action attempt, BYOK key exposure, LLM injection detection) to ÖBB's security monitoring pipeline — not to perform the regulatory filing itself. FR58 covers this. **Becomes a PoC blocker when:** (a) platform handles live operational data for trains in revenue service, or (b) PoC scope expands beyond 5 trains. Whichever comes first. Before that threshold is crossed, the security incident runbook must be signed off by ÖBB PV/BCC security and Nomad Rail legal.
-- BYOK API keys for Hermes must never appear in source control, logs, or inference code paths
+- BYOK API keys for Kondukt must never appear in source control, logs, or inference code paths
 - Prompt injection threat model: all LLM output sanitised before reaching UI render layer
 
 **EU Cyber Resilience Act (CRA, Regulation 2024/2847)**
@@ -432,14 +432,14 @@ Three landside surfaces, delivered in priority order:
 
 **EU AI Act (Regulation 2024/1689) — Article 14 Human Oversight**
 - AI Act becomes enforceable on **2 August 2026**, before pilot start. Railway operations is Annex III critical infrastructure → high-risk AI system classification by default.
-- **MVP advisory-only posture materially reduces exposure:** the platform does not output decisions that get automatically executed — it outputs recommendations that a human (Disponent, ECM Manager, Telematics Sub-PM) reviews and acts on via their existing operational systems. Article 14 human-oversight requirements are met by the platform's design — every Hermes recommendation is reviewable, modifiable, and rejectable; the audit trail captures the human's decision and the action taken; the platform itself never closes the loop.
+- **MVP advisory-only posture materially reduces exposure:** the platform does not output decisions that get automatically executed — it outputs recommendations that a human (Disponent, ECM Manager, Telematics Sub-PM) reviews and acts on via their existing operational systems. Article 14 human-oversight requirements are met by the platform's design — every Kondukt recommendation is reviewable, modifiable, and rejectable; the audit trail captures the human's decision and the action taken; the platform itself never closes the loop.
 - The boundary doc (see §13) and the AI Act Article 14 compliance crosswalk annex articulate this.
 - Phase 2 reintroduces dispatch and requires a re-assessment of Article 14 obligations as a precondition of release.
 
 ### Technical Constraints
 
 **Landside Infrastructure**
-- PostgreSQL for all operational state — no React component state or Hermes conversation memory for acknowledged alerts or status changes
+- PostgreSQL for all operational state — no React component state or Kondukt conversation memory for acknowledged alerts or status changes
 - pgvector extension required — `CREATE EXTENSION vector` needs superuser or `pg_extension_owner` role; migration must include `IF NOT EXISTS` guard
 - **pgvector P99 latency SLA: <500ms (contractual ceiling) / <250ms at 50K vectors with ef_search=64 (internal target)** — if 500ms ceiling exceeded, fallback to keyword ranking (`search_fleet_events` full-text), logged as WARN; UI labels results "Keyword search active". Formal acceptance criterion for the pgvector spike story. Do not write the CI latency gate test until corpus exceeds 100K vectors (post-MVP).
 - Alembic migrations safe under concurrent reads — no table locks during pilot operations
@@ -462,7 +462,7 @@ Three landside surfaces, delivered in priority order:
 **Security**
 - BYOK API keys stored in environment variables (PoC) or Docker secrets (fleet) — never in source control
 - All external data (IntentPackets, MCP tool inputs, vendor diagnostic feeds) treated as untrusted — schema validation before any AI decision path
-- LLM output sanitisation layer required between Hermes response and Fleet Manager UI render
+- LLM output sanitisation layer required between Kondukt response and Fleet Manager UI render
 - **Recommended Action Object review and operator-action logging** — the platform does not dispatch in MVP. The 'Mark executed' confirmation is recorded against the operator's IdP-bound session as a shadow audit event. Re-verified IdP session is not required for the confirmation gesture because no operational system is being mutated by the platform.
 
 ### Integration Requirements
@@ -472,7 +472,7 @@ Three landside surfaces, delivered in priority order:
 | Identity provider (IdP) | Identity for ECM shadow sign-off + RAO confirmation | **MVP: Keycloak with manually created users.** ÖBB IdP integration is a post-MVP change request, costed separately. | Must be IdP-bound, not local session |
 | MQTT broker | IntentPacket consumption from oebb-brain | Owned by brain — landside is subscriber | `oebb/{train_id}/intent` |
 | Rail MCP Server | HTTP MCP endpoint — spec frozen. 9 tools: `get_fleet_events`, `get_fleet_summary`, `get_hafas_timetable`, `search_fleet_events`, `get_maintenance_cost_estimate`, `get_shift_handover`, `get_ecm_audit_trail`, `get_intent_packet`, `get_forward_planning`. `trigger_edge_diagnostics` removed 2026-05-25 (see §9 ADR). Spec authority: `rail-mcp-server-spec-2026-05-23.md` | Spec frozen | New subpackage `rail-mcp-server/` |
-| Hermes (BYOK) | LLM orchestration agent runtime | Designed, not built | Nous Research, MIT licence |
+| Kondukt (BYOK) | LLM orchestration agent runtime | Designed, not built | Nous Research, MIT licence |
 | HAFAS | Timetable data (read-only in MVP); rotation write-back deferred to Phase 2 | Required for Fleet Manager + Telematics | 48h horizon for planning; MVP reads only — operator dispatches via HAFAS directly |
 | SAP PM/EAM | Asset registry + work order creation | **Post-MVP** — no SAP integration in PoC. Topology metadata drawers and work order write-back require API contract with ÖBB TS. | Read for asset metadata; write for work order routing |
 | ServiceNow ITSM | Ticket creation from Fleet Manager triage | **Post-MVP** | Bidirectional sync — incidents flow both ways |
@@ -485,18 +485,18 @@ Three landside surfaces, delivered in priority order:
 
 | Risk | Mitigation |
 |---|---|
-| BYOK prompt injection | Output sanitisation layer between Hermes and UI render — validated schema, reject unexpected fields, log anomalies |
+| BYOK prompt injection | Output sanitisation layer between Kondukt and UI render — validated schema, reject unexpected fields, log anomalies |
 | pgvector migration blocks reads | Migration with `IF NOT EXISTS` guard; confirm PostgreSQL user has extension creation rights; document `DROP EXTENSION vector CASCADE` rollback risk |
 | ECM sign-off record loss (connectivity gap) | Queue locally at depot, sync on reconnect; extended loss flagged in audit as gap with last-known timestamp |
 | BOOM API unknown | Scoped as "BOOM-ready" not "BOOM-integrated" — structured export only until API contract confirmed with ÖBB IT |
 | NIS2 incident reporting obligation (24-72-30 cadence) | Platform emits structured security incident events (FR58) supporting all three reporting stages (24h early warning, 72h notification, 30d final report); ÖBB IT Security (ÖBB PV and BCC departments) owns the regulatory filings. Runbook must be signed off before platform handles live revenue-service data or exceeds 5-train scope — whichever comes first. Tabletop exercise at manday 20–25 validates end-to-end. Owner: ÖBB PV/BCC security + Nomad Rail legal. |
 | CRA reporting readiness | Structured incident endpoint + SBOM + security.txt + vuln-handling process + signed releases in place before pilot manday 1. Tabletop exercise at manday 20–25 validates the end-to-end process. Live ENISA integration deferred to Phase 2. |
-| AI Act Article 14 oversight design | Advisory-only MVP design satisfies Article 14 by construction — Hermes outputs recommendations, never automated decisions. Phase 2 release requires a fresh Article 14 assessment before dispatch capability is enabled. |
+| AI Act Article 14 oversight design | Advisory-only MVP design satisfies Article 14 by construction — Kondukt outputs recommendations, never automated decisions. Phase 2 release requires a fresh Article 14 assessment before dispatch capability is enabled. |
 | § 1313a ABGB / Erfüllungsgehilfe | Austrian civil code defaults to inclusion of sub-performers in contracting party's responsibility unless explicitly carved out. Boundary doc duties-matrix annex enumerates operator duties *affirmatively* (not by exclusion). Third-party components (Hailo runtime, OS, key-management lib) get explicit treatment — flow-down liability to suppliers OR explicit ÖBB-acceptance documentation. See §13. |
 | BYOK data residency not confirmed | BYOK keys and vehicle state snapshots must be designated to EU GDPR processors. **Blocks procurement sign-off for multi-tenant rollout.** PoC unaffected. Must be resolved before commercial expansion. |
 | pgvector latency exceeds SLA | Fallback to keyword ranking (WARN logged, UI labelled). Spike story must confirm or revise <500ms P99 target before Fleet Manager stories begin. |
 | RAO outcome-verification gap | When the operator marks an RAO executed but the platform cannot verify the outcome via downstream polling, the entry is recorded as 'self-reported unverified'. Persistent unverified outcomes feed into Phase 2 readiness assessment and may downgrade trust criteria. |
-| Hermes data residency vs vendor portal credentials | Vendor portal credentials must not pass through inference code path; resource initialisation pattern enforced |
+| Kondukt data residency vs vendor portal credentials | Vendor portal credentials must not pass through inference code path; resource initialisation pattern enforced |
 
 ### UX Constraints (Domain-Driven)
 
@@ -615,7 +615,7 @@ Every multi-state UI element (notably the FR36 fleet matrix's three-state encodi
 
 ### Project-Type Overview
 
-This platform is a **landside B2B SaaS surface** with multi-system integration and an embedded AI agent (Hermes BYOK). It serves three landside user surfaces — Depot Briefing PWA (mobile-first), Fleet Manager AI Interface (web), and Telematics Project Management surfaces (web, 3-zone control board).
+This platform is a **landside B2B SaaS surface** with multi-system integration and an embedded AI agent (Kondukt BYOK). It serves three landside user surfaces — Depot Briefing PWA (mobile-first), Fleet Manager AI Interface (web), and Telematics Project Management surfaces (web, 3-zone control board).
 
 ---
 
@@ -647,8 +647,8 @@ MVP uses Keycloak with manually created users — no ÖBB SSO integration. ÖBB 
 |---|---|---|---|
 | Identity provider (IdP) | Identity for ECM shadow sign-off + RAO confirmation | **MVP: Keycloak with manually created users.** ÖBB SSO IdP integration is post-MVP — scoped as a change request. | Per-operator SAML bridge at fleet rollout |
 | MQTT broker | IntentPacket consumption from oebb-brain | Onboard subscriber only | **Blocking pre-fleet:** broker identity, failover, and multi-train topic isolation specified by brain team |
-| Rail MCP Server | HTTP MCP endpoint — 9 tools for Hermes | Spec frozen | Required for Fleet Manager + Telematics |
-| Hermes (BYOK) | LLM orchestration, operator-owned API keys | Designed, not built | BYOK cost simulator required before fleet sales |
+| Rail MCP Server | HTTP MCP endpoint — 9 tools for Kondukt | Spec frozen | Required for Fleet Manager + Telematics |
+| Kondukt (BYOK) | LLM orchestration, operator-owned API keys | Designed, not built | BYOK cost simulator required before fleet sales |
 | HAFAS | Timetable + rotation write-back | Required for Fleet Manager | 48h horizon |
 | SAP PM/EAM | Asset metadata + work order write-back | **Post-MVP** — API contract required with ÖBB TS before integration stories | Read for asset metadata; write for work order routing |
 | ServiceNow ITSM | Ticket creation from triage | Post-MVP | API contract required |
@@ -662,11 +662,11 @@ MVP uses Keycloak with manually created users — no ÖBB SSO integration. ÖBB 
 
 ### What Is Novel Here (Landside)
 
-This platform reframes landside fleet operations around **structured recommendation infrastructure** — every operationally relevant observation produces a Hermes-generated recommendation; every operator action against that recommendation is captured as a versioned, immutable shadow audit event; every paper-trail event is reconciled against the shadow. The novel claims, in MVP-applicable form:
+This platform reframes landside fleet operations around **structured recommendation infrastructure** — every operationally relevant observation produces a Kondukt-generated recommendation; every operator action against that recommendation is captured as a versioned, immutable shadow audit event; every paper-trail event is reconciled against the shadow. The novel claims, in MVP-applicable form:
 
 ---
 
-**Claim 1 — Hermes Recommended Action Objects bridge AI advice and operator action via a single readable review gate**
+**Claim 1 — Kondukt Recommended Action Objects bridge AI advice and operator action via a single readable review gate**
 
 The Disponent currently switches between 4–7 systems to execute one redeployment decision and produces no structured record of the decision chain. The platform's Recommended Action Objects bundle multi-system action descriptions (HAFAS rotation update + SAP work order — SAP post-MVP) into a single structured proposal with step-by-step execution guidance. The operator reviews, acts via existing systems, and confirms — the platform shadows the chain. Phase 2 (post-pilot) closes the human-in-the-middle latency once trust criteria are met; the structural innovation in MVP is the *evidence-grade recommendation→action→outcome dataset* that gates Phase 2.
 
@@ -711,7 +711,7 @@ No competitor in this market offers a phased trust progression where Phase 1 is 
 | Risk | Mitigation |
 |---|---|
 | Recommended Action Object UX template — three-tier confidence card grammar | Freya prototypes the three-tier card pattern (confident/hedged/forced-two-step) per §G26 before stories begin; rules-based tier selector unit-tested before pilot |
-| Hermes BYOK + operator-action logging security | Hermes spike 4 (BYOK 429 + credential handling) must complete before RAO stories begin; output sanitisation between Hermes and UI render layer is mandatory |
+| Kondukt BYOK + operator-action logging security | Kondukt spike 4 (BYOK 429 + credential handling) must complete before RAO stories begin; output sanitisation between Kondukt and UI render layer is mandatory |
 | Vendor portal integration legal posture | Read-only access to vendor portals may be restricted by vendor contracts — confirm with ÖBB legal before Telematics warranty stories |
 | Telematics surfaces under-spec at UX level | Scope is locked (§8) but UX detailing is in flight; Freya owns the Unified Telematics Control Panel wireframes and interaction spec before stories begin. PRD scope does not change; UX delivery sequencing does. |
 | Phase 1 trust criteria not met at pilot end | Composite criteria are weighted, not binary — partial trust unlocks a narrower Phase 2 scope (e.g., dispatch on read-only HAFAS rotation updates only, deferring SAP write-back further). Phase 2 release is itself phased. |
@@ -724,7 +724,7 @@ No competitor in this market offers a phased trust progression where Phase 1 is 
 
 **Approach:** Compliance-first, advisory-only landside platform PoC — single release covering Depot Briefing + Fleet Manager + Telematics control board surfaces, all in advisory mode. Phase 2 (post-pilot) reintroduces dispatch and authoritative recording, gated on pilot-end trust criteria. Commercial pilot narrative leads with ECM proof point (Dr. Fischer sign-off on shadow-vs-paper match rate), Fleet Manager second (Disponent decision latency on recommendation→action chains), Telematics third (warranty triage on first Probebetrieb cycle).
 
-**Resource Requirements:** One full-stack dev (React + Python/FastAPI), one AI/ML engineer (Hermes integration, prompt engineering, output sanitisation), one DevOps/infra (Docker, MQTT subscriber, PostgreSQL, pgvector).
+**Resource Requirements:** One full-stack dev (React + Python/FastAPI), one AI/ML engineer (Kondukt integration, prompt engineering, output sanitisation), one DevOps/infra (Docker, MQTT subscriber, PostgreSQL, pgvector).
 
 ---
 
@@ -739,7 +739,7 @@ No competitor in this market offers a phased trust progression where Phase 1 is 
 | Depot Briefing — ECM 1 blocking state + append-only shadow audit trail | Phase 1 records shadow; Phase 2 promotes to authoritative. Regulatory capability proof — closes the compliance sale. |
 | Depot Briefing — role-filtered technician feed (electrical/mechanical/IT) | Operational value; required for depot pilot |
 | Fleet Manager — triage + cost-impact one-liner | Disponent KPI alignment; prevented delay-minutes counterfactual |
-| Fleet Manager — Hermes BYOK + Rail MCP Server (9 tools) | Natural language query layer; differentiates from dashboard competitors |
+| Fleet Manager — Kondukt BYOK + Rail MCP Server (9 tools) | Natural language query layer; differentiates from dashboard competitors |
 | Fleet Manager — Recommended Action Objects with three-tier confidence card review + operator-action logging | Core landside innovation — multi-system recommendation under single review gate. Dispatch is operator-side via existing systems in MVP. |
 | Fleet Manager — shift handover flow | Required for multi-shift pilot |
 | pgvector semantic search + keyword fallback | Spike gate: P99 <500ms contractual (target <250ms at 50K vectors) before stories |
@@ -752,7 +752,7 @@ No competitor in this market offers a phased trust progression where Phase 1 is 
 |---|---|
 | Zone 1: Macro situational awareness — fleet compatibility matrix (DOSTO Neu + Enzo — both new Stadler deliveries; pilot on DOSTO Neu, Enzo onboarded on rollout success) + geospatial telemetry overlay with dead-zone detection | Daily-use surface for Teil-Projektleitung; foundation for warranty + OTA evidence |
 | Zone 2: Micro visual train topology — SVG anatomy + inline metadata drawers per hardware node (MAC, serial, firmware; sourced from IntentPackets + local registry in MVP; SAP asset registry post-MVP) | Required for warranty triage and digital-twin validation flows |
-| Zone 3: Hermes AI Co-Pilot Console — chat + **Proactive Recommendation Cards in RAO format with three-tier confidence visual grammar** | The action surface; the same RAO pattern as Fleet Manager |
+| Zone 3: Kondukt AI Co-Pilot Console — chat + **Proactive Recommendation Cards in RAO format with three-tier confidence visual grammar** | The action surface; the same RAO pattern as Fleet Manager |
 | Cross-zone interaction binding (Zone 1 vehicle select → Zone 2 topology; Zone 1/2 fault → Zone 3 card) | Without this, the three zones are three disconnected pages |
 | OTA rollout monitoring: canary uptime tracking + firmware/configuration drift detection (local registry in MVP; SAP asset registry post-MVP) | Use Case 4 — ÖBB monitors and approves rollouts; platform surfaces drift, not executes rollout |
 | Warranty evidence packaging Recommended Action Object (operator submits to vendor systems in MVP) | Use Case 5 — vendor leverage during Probebetrieb |
@@ -775,7 +775,7 @@ No competitor in this market offers a phased trust progression where Phase 1 is 
 | Spike | Gate | Outcome if missed |
 |---|---|---|
 | pgvector P99: <500ms contractual ceiling / <250ms at 50K vectors internal target (ef_search=64) | Before Fleet Manager search stories | Keyword fallback only; semantic search deferred |
-| Hermes BYOK 429 handling + credential isolation | Before RAO stories | RAO feature deferred to post-PoC |
+| Kondukt BYOK 429 handling + credential isolation | Before RAO stories | RAO feature deferred to post-PoC |
 | RAO outcome reconciliation semantics (operator-execution polling against HAFAS read endpoints) | Before recommendation→action chain stories | Reduce scope to single-system recommendations only |
 | SAP PM API contract for write-back | Post-MVP gate — SAP not in MVP scope (Phase 2 expansion) | Phase 2 ships HAFAS dispatch only initially; SAP work order write-back requires API contract with ÖBB TS |
 | CRA-readiness tabletop exercise | Pilot manday 20–25 | Goes/no-goes the Phase 2 readiness recommendation independently of the trust criteria |
@@ -786,7 +786,7 @@ No competitor in this market offers a phased trust progression where Phase 1 is 
 
 **Technical risks:**
 - pgvector P99 <500ms contractual, <250ms internal — spike story with keyword fallback confirmed before Fleet Manager search stories
-- Hermes BYOK 429 + credential isolation — spike before any RAO story
+- Kondukt BYOK 429 + credential isolation — spike before any RAO story
 - **Shadow audit-trail divergence from paper** — explicit reconciliation queue with 24h SLA on flagging divergences; 100% match rate is a Phase 2 gate
 - Brain ingest gap — coordinate with brain team on WAL-before-truncate sync; landside surfaces staleness explicitly
 
@@ -820,13 +820,13 @@ The following decisions are deferred to the architecture phase. They are not PoC
 
 | Decision | Context | Gate |
 |---|---|---|
-| Hermes intent disambiguation rules | FR identifying user intent and selecting Rail MCP tool. Rules-based, embedding-based, or LLM-classified is an architecture decision. | Before Fleet Manager Hermes stories |
+| Kondukt intent disambiguation rules | FR identifying user intent and selecting Rail MCP tool. Rules-based, embedding-based, or LLM-classified is an architecture decision. | Before Fleet Manager Kondukt stories |
 | RAO outcome reconciliation semantics | What constitutes "recommended" vs "reviewed" vs "operator-executed" vs "outcome-verified"; how outcome polling works against HAFAS read endpoints; how self-reported-unverified outcomes are surfaced. **Dispatch reconciliation moves to Phase 2 backlog.** | Before RAO outcome-polling stories |
 | MQTT broker identity (consumer side) | Subscriber host, auth model, multi-train topic subscription strategy | Owned by brain team — landside consumes spec |
 | Schema evolution strategy (landside consumer) | When brain bumps IntentPacket schema, how landside handles forward/backward compatibility for in-flight packets | Post-PoC; must not block PoC |
 | Telematics surface scope | ~~Which Gemini-derived surfaces are MVP vs post-MVP~~ — **resolved 2026-05-25:** full Unified Telematics Control Panel locked into MVP. See §8 capability table. | n/a — closed |
 | Landside→brain command channel (`trigger_edge_diagnostics`) | **Resolved 2026-05-25:** Dropped from MVP. The brain emits IntentPackets on every state transition within 2s — there is no polling cadence to bypass. Landside staleness is caused by hardware/network gaps that a diagnostic ping cannot resolve, or by the brain not detecting a state change yet, which a ping also cannot resolve. Warranty triage (Journey 6) requires immutable timestamped chain-of-custody evidence — on-demand diagnostics at investigation time would weaken, not strengthen, vendor disputes. Landside remains a pure IntentPacket subscriber for v1. **Revisit trigger:** post-pilot telemetry shows >X% of Telematics or Fleet Manager decisions made on IntentPackets older than the brain's 5-minute pilot-kill-trigger threshold — specifics named after pilot baseline established. Any future landside-initiated tool requires a joint brain+landside ADR signed by both tech leads before scoping begins. | n/a — closed |
-| Fleet Manager AI interface frontend wrapper | Browser app shell architecture (React layout, state management, routing) over Hermes agent backend | Before Fleet Manager UI stories |
+| Fleet Manager AI interface frontend wrapper | Browser app shell architecture (React layout, state management, routing) over Kondukt agent backend | Before Fleet Manager UI stories |
 | Phase 1 trust criteria thresholds | Specific numeric thresholds (especially RAO acceptance rate target) require Roland Ruisz agreement before pilot manday 1. Default working assumption: ≥70% acceptance rate, 100% shadow-match rate, qualitative sign-offs from Renate + outside auditor. | Pilot manday 1 |
 | Phase 2 contractual structure | Is Phase 2 a contract renewal, a contract amendment, or a clause already in the Phase 1 contract that auto-activates on trust-criteria satisfaction? Pricing-model owner decides; legal counsel reviews. | Before procurement review (target: ~2 weeks pre-pilot) |
 | Boundary doc structure & ownership | 3-layer structure (capability brochure body / sword; duties-matrix annex / § 1313a defence; compliance crosswalk annexes / shield) per §13. Body authored by Mary; duties matrix co-authored by Winston (legal precision) + Mary (operational language); compliance annexes authored by Winston with Austrian-qualified legal review. | Joint drafting session mid-June 2026 if legal counsel availability confirmed; doc v1.0 to Martin Lerch ~3–4 weeks before pilot manday 1; procurement copy ~2 weeks before pilot manday 1 |
@@ -845,9 +845,9 @@ The following decisions are deferred to the architecture phase. They are not PoC
 | IntentPacket landside ingest latency | < 2s from MQTT receipt to PostgreSQL commit | Excludes brain-side emission latency |
 | Fleet Manager triage feed load | < 3s initial render | PostgreSQL query under PoC fleet size (~10–20 vehicles) |
 | ECM shadow sign-off commit | < 1s write acknowledgement | Landside PostgreSQL direct write to shadow audit trail |
-| Rail MCP Server tool call timeout | 8s hard timeout | Hermes surfaces structured error; Fleet Manager decision logged with data-availability flag |
+| Rail MCP Server tool call timeout | 8s hard timeout | Kondukt surfaces structured error; Fleet Manager decision logged with data-availability flag |
 | RAO outcome-polling latency | < 30s per system after operator-execution mark | Polling cycle against HAFAS read endpoints; verification result surfaces on the shadow record |
-| Hermes response latency for query (BYOK) | P95 < 8s | Operator-owned LLM; depends on BYOK provider |
+| Kondukt response latency for query (BYOK) | P95 < 8s | Operator-owned LLM; depends on BYOK provider |
 
 ### Reliability
 
@@ -857,7 +857,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 | Landside event delivery | No duplicate delivery after service restart | Idempotency on `packet_id` |
 | Alembic migration write-lock ceiling | < 30s | Any migration exceeding this threshold requires an offline maintenance window; rollback path documented before merge |
 | RAO outcome reconciliation | All operator-reported outcomes verified against downstream-system polling within 30s; unverified outcomes flagged within 24h | Reconciliation queue persistent in `recommended_action_outbox`; in-memory queues not permitted |
-| Hermes BYOK retry policy | Exponential backoff, budget-capped | Configurable per operator; default 3 retries with 1s/4s/15s delays |
+| Kondukt BYOK retry policy | Exponential backoff, budget-capped | Configurable per operator; default 3 retries with 1s/4s/15s delays |
 
 ### Security
 
@@ -866,7 +866,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 | ECM shadow sign-off identity | IdP-bound only | Shadow sign-off identity bound to ÖBB SSO (Keycloak in MVP, ÖBB IdP post-MVP). Paper sign-off identity remains ÖBB's existing process. |
 | RAO 'Mark executed' confirmation identity | IdP session re-verified at moment of confirmation | This logs the operator-side action against a verified identity but does not authorise dispatch (no dispatch in MVP). |
 | BYOK API key storage | Never in source control, logs, or inference paths | Env vars (PoC), Docker secrets (fleet) |
-| LLM output sanitisation | Validated Pydantic schema before UI render; retry-with-error-feedback on schema failure (≤2 retries, then escalate to human-readable error surface) | Between Hermes response and Fleet Manager render layer — prompt injection mitigation |
+| LLM output sanitisation | Validated Pydantic schema before UI render; retry-with-error-feedback on schema failure (≤2 retries, then escalate to human-readable error surface) | Between Kondukt response and Fleet Manager render layer — prompt injection mitigation |
 | Vendor portal credential isolation | Resource initialisation only — never inline in inference paths | Per-vendor credentials scoped to read-only operations |
 | External data validation | Schema validation before any AI decision path | All IntentPackets, MCP tool inputs, vendor diagnostic feeds treated as untrusted |
 
@@ -876,7 +876,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 |---|---|---|
 | PoC fleet size | 1–5 trains, 10–20 vehicles | Single ÖBB tenant, on-premise |
 | Fleet rollout architecture | Per-operator deployment | Separate instances per operator — no shared-database multi-tenancy in initial fleet architecture |
-| Hermes API quota | Operator-owned | BYOK model — operator owns API quota; platform does not throttle |
+| Kondukt API quota | Operator-owned | BYOK model — operator owns API quota; platform does not throttle |
 | PostgreSQL read concurrency | Migrations safe under concurrent reads | No table locks on reads during pilot operations |
 | Telematics fleet matrix render | Smooth at 109 vehicles (full Cityjet DOSTO Neu fleet) | UI virtualization required at fleet rollout scale |
 
@@ -897,7 +897,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 |---|---|---|
 | IntentPacket schema (landside consumer) | Tracks brain-owned v1.0.0 | Schema evolution coordinated with brain team |
 | Alembic migrations | Reversible, rollback path documented before merge | See reliability: write-lock ceiling 30s |
-| Recommended Action Object schema | **Schema of record** (2026-05-25): `{ intent_id: uuid, action_type: str, justification: str [mandatory], confidence: float \| null [reserved for Phase 2], confidence_source: enum{model, rule, human_override, null} [reserved], operations: [{ sequence: int, system: str, method: str, payload: {}, expected_outcome_signature: {} }] }`. Versioned — `intent_id` includes schema version prefix. `justification` is mandatory; Hermes must not generate an object without it. `confidence` field reserved for Phase 2 calibration (defaults to null in MVP; tier selection uses rules-based proxies per §UX Constraints "Three-Tier Recommendation Card Visual Grammar"). `expected_outcome_signature` added so operator-reported outcomes can be programmatically reconciled against downstream-system polling. `operations[]` are ordered by `sequence`. Schema evolution requires a joint landside ADR before any field addition or removal. | Schema evolution does not break in-flight intents |
+| Recommended Action Object schema | **Schema of record** (2026-05-25): `{ intent_id: uuid, action_type: str, justification: str [mandatory], confidence: float \| null [reserved for Phase 2], confidence_source: enum{model, rule, human_override, null} [reserved], operations: [{ sequence: int, system: str, method: str, payload: {}, expected_outcome_signature: {} }] }`. Versioned — `intent_id` includes schema version prefix. `justification` is mandatory; Kondukt must not generate an object without it. `confidence` field reserved for Phase 2 calibration (defaults to null in MVP; tier selection uses rules-based proxies per §UX Constraints "Three-Tier Recommendation Card Visual Grammar"). `expected_outcome_signature` added so operator-reported outcomes can be programmatically reconciled against downstream-system polling. `operations[]` are ordered by `sequence`. Schema evolution requires a joint landside ADR before any field addition or removal. | Schema evolution does not break in-flight intents |
 
 ---
 
@@ -927,7 +927,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 - FR15: Fleet Manager can view an incoming shift handover summary at the top of the triage view on login
 - FR16: Fleet Manager can review the conductor dismissal queue (from brain feed) and promote or discard individual dismissals as alert threshold tuning signals
 
-### Fleet Manager AI Query (Hermes)
+### Fleet Manager AI Query (Kondukt)
 
 - FR17: Fleet Manager can query the fleet via natural language and receive a structured response grounded in live fleet data
 - FR18: Fleet Manager can query predicted maintenance windows and fleet availability over a 48–72h horizon
@@ -938,13 +938,13 @@ The following decisions are deferred to the architecture phase. They are not PoC
 
 ### Recommended Action Objects (RAOs)
 
-- FR23: Hermes can generate a Recommended Action Object conforming to the schema of record (`intent_id`, `action_type`, `justification` [mandatory], `confidence` [Phase 2-reserved, null in MVP], `confidence_source` [Phase 2-reserved], `operations[]` with `sequence`/`system`/`method`/`payload`/`expected_outcome_signature`), bundling operations across MVP-integrated systems (HAFAS only in MVP). `justification` must be non-empty — schema validator rejects objects without it. SAP PM and ServiceNow operations are post-MVP — the schema validator rejects them with a clear "system not integrated in this release" error
+- FR23: Kondukt can generate a Recommended Action Object conforming to the schema of record (`intent_id`, `action_type`, `justification` [mandatory], `confidence` [Phase 2-reserved, null in MVP], `confidence_source` [Phase 2-reserved], `operations[]` with `sequence`/`system`/`method`/`payload`/`expected_outcome_signature`), bundling operations across MVP-integrated systems (HAFAS only in MVP). `justification` must be non-empty — schema validator rejects objects without it. SAP PM and ServiceNow operations are post-MVP — the schema validator rejects them with a clear "system not integrated in this release" error
 - FR24: Fleet Manager can review the full operations list of a Recommended Action Object before confirming — every system the operator must touch and every payload visible — including a step-by-step execution guide for the existing operational system
 - FR25: The 'Mark executed' confirmation re-verifies the user's SSO session at the moment of click — not just at app load — and binds the confirmation to the verified identity. **MVP: the confirmation is operator self-report of having executed via existing systems. Phase 2 expansion: same gesture authorises platform-side dispatch.**
 - FR26: Confirmed RAO is logged to `recommended_action_audit` with `intent_id`, operator identity, timestamp, operations the operator reported executing, downstream-state polling result per operation, and final outcome status (verified / self-reported-unverified / divergent)
 - FR27: Operator-reported execution outcomes that cannot be verified by downstream polling are surfaced as distinct 'Self-reported — outcome unverified' UI state. Persistent unverified outcomes feed Phase 2 trust-criteria assessment
 - FR28: The `recommended_action_outbox` table (PostgreSQL) persists all RAOs and their reconciliation state with `idempotency_key UNIQUE`; in-memory queues not used. Survives platform restart without loss.
-- FR28a: Hermes RAO output passes Pydantic schema validation before UI render; on validation failure, the platform retries the Hermes call once with the schema error appended (`retry-with-error-feedback`); on second failure, the operator sees a human-readable 'Recommendation engine returned a malformed response — manual decision required' state with the raw Hermes response available on request
+- FR28a: Kondukt RAO output passes Pydantic schema validation before UI render; on validation failure, the platform retries the Kondukt call once with the schema error appended (`retry-with-error-feedback`); on second failure, the operator sees a human-readable 'Recommendation engine returned a malformed response — manual decision required' state with the raw Kondukt response available on request
 - FR28b: Every RAO presented to the operator is rendered in one of three confidence tiers (Tier 1 confident / Tier 2 hedged / Tier 3 forced-two-step) per the rules-based tier selector specified in §UX Constraints "Three-Tier Recommendation Card Visual Grammar". Tier assignment is deterministic and unit-tested; the rule that fired is visible on the card. Phase 2 expansion: rule-based tier selection augmented with calibrated confidence model trained on Phase 1 outcomes.
 
 ### Dispatcher Coordination *(Post-MVP — Dispatcher persona deferred from MVP scope)*
@@ -974,14 +974,14 @@ The following decisions are deferred to the architecture phase. They are not PoC
 - FR49: Teil-Projektleitung Telematik can trigger an on-demand Digital Twin validation after a workshop hardware swap: the brain retrieves current hardware state from the onboard Stadler diagnostic system and sends it to landside as an IntentPacket; landside compares the received hardware state against the vehicle's expected schematic (local platform registry) and surfaces configuration discrepancies in the topology view before the vehicle is cleared to leave the workshop.
 - FR54: Topology nodes degrade gracefully under partial node failure: affected nodes grey out with a "Stale Data" badge showing elapsed time since last successful handshake; the topology view does not display blank state or trigger false red-alerts
 
-**Zone 3 — Hermes Console + Cross-Zone Interaction**
+**Zone 3 — Kondukt Console + Cross-Zone Interaction**
 - FR50: Selecting a vehicle in Zone 1 (matrix or geospatial overlay) opens that vehicle's topology in Zone 2; a fault detected in Zone 1 or Zone 2 generates a Proactive Recommendation Card in Zone 3 in Recommended Action Object format with three-tier confidence visual grammar (see §UX Constraints)
 - FR51: Teil-Projektleitung Telematik can view Zone 1, Zone 2, and Zone 3 in a single workspace (the Unified Telematics Control Panel) — no full-screen mode switching required to retain context across zones
 
 **Telematics action flows**
 - FR39: Teil-Projektleitung Telematik can monitor OTA rollout progress across the fleet: the platform displays the firmware and software version last reported by each unit, sourced from the most recent IntentPacket received from the brain (which retrieves version state from the onboard Stadler diagnostic system). Lukas can see at a glance which units have confirmed the new patch level, which are on a prior version, and which have not reported in (with last-seen timestamp). ÖBB monitors; rollout execution is performed by Nomad Rail operations or the manufacturer.
 - FR40: System detects configuration drift by cross-referencing reported firmware/hardware revisions against the platform's local asset registry; incompatible or drifted units are surfaced for manual review. **MVP: local registry, not SAP asset registry (SAP integration post-MVP).**
-- FR41: Teil-Projektleitung Telematik can generate a warranty evidence package as a Recommended Action Object — Hermes correlates onboard IntentPacket history + landside service telemetry + local asset registry metadata into a structured PDF export attachable to vendor tickets. Export is downloaded by the operator and submitted manually to vendor ticketing systems. The platform does not file warranty claims directly. *(SAP asset metadata cross-reference is post-MVP.)*
+- FR41: Teil-Projektleitung Telematik can generate a warranty evidence package as a Recommended Action Object — Kondukt correlates onboard IntentPacket history + landside service telemetry + local asset registry metadata into a structured PDF export attachable to vendor tickets. Export is downloaded by the operator and submitted manually to vendor ticketing systems. The platform does not file warranty claims directly. *(SAP asset metadata cross-reference is post-MVP.)*
 - FR52: Teil-Projektleitung Telematik can view a Probebetrieb (trial run) validation surface during the 2-week passenger trial of a newly delivered train: system displays end-to-end network path for each detected fault, proving whether the issue is inside an ÖBB landside server or the manufacturer's onboard hardware
 - FR53: Teil-Projektleitung Telematik can convert a predictive edge alert into a pre-emptive workshop reservation via the `reserve_maintenance_slot` MCP tool. **MVP: the recommendation generates the booking proposal; the operator confirms with the workshop via existing communication channels and marks the slot reserved in the platform. Phase 2 expansion: platform-side reservation via workshop scheduling API.**
 - FR55: *(Removed — Lastenheft procurement clause export descoped. Format, consumer, and failure threshold were undefined and the feature cannot be evidenced during the pilot. Moved to Vision if reinstated post-pilot.)*
@@ -992,7 +992,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 - FR42: All compliance actions can be bound to an ÖBB SSO IdP identity, not a local session. **MVP scope:** safety-critical-action surface is descoped (advisory-only); identity binding applies to ECM shadow sign-offs, RAO 'Mark executed' confirmations, technician shadow ACKs, and warranty-evidence export downloads.
 - FR43: Each platform surface enforces role-based access. For controls a user's role cannot execute: the control is **rendered but visually disabled** with a tooltip explaining the permission gap (e.g. "Approval requires Fleet Manager role") — it is not hidden. Rationale: in safety-critical ops, operators need to know the full action space to make correct escalation decisions. Server-side authorization on the approval endpoint is the binding enforcement layer; the disabled UI state is defense-in-depth, not the security boundary.
 - FR44: System records every acknowledgement, sign-off, dismissal, RAO confirmation, and status change as a server-side write to PostgreSQL, not component state
-- FR58: System emits a structured security incident event to ÖBB's security monitoring pipeline for each of the following: authentication anomaly (failed IdP verification on a safety-critical action), unauthorised action attempt (including unauthorised RAO confirmation or shadow sign-off attempt), BYOK key exposure detection (key appears in any logged field), LLM injection detection (output sanitisation layer rejects a Hermes response). **Event payload supports full NIS2 24-72-30 reporting cadence and CRA Article 14 reporting** — fields include: event type, surface, user identity (if known), timestamp, severity, scope, affected systems, `cra_extension: { product_identifier, cve_ids, actively_exploited, coordinated_disclosure_status }`. ÖBB IT Security owns regulatory filings; the platform owns event emission.
+- FR58: System emits a structured security incident event to ÖBB's security monitoring pipeline for each of the following: authentication anomaly (failed IdP verification on a safety-critical action), unauthorised action attempt (including unauthorised RAO confirmation or shadow sign-off attempt), BYOK key exposure detection (key appears in any logged field), LLM injection detection (output sanitisation layer rejects a Kondukt response). **Event payload supports full NIS2 24-72-30 reporting cadence and CRA Article 14 reporting** — fields include: event type, surface, user identity (if known), timestamp, severity, scope, affected systems, `cra_extension: { product_identifier, cve_ids, actively_exploited, coordinated_disclosure_status }`. ÖBB IT Security owns regulatory filings; the platform owns event emission.
 
 ### Resilience & Consistency
 
@@ -1059,7 +1059,7 @@ The regulatory boundary documentation for ÖBB has a **3-layer structure**. The 
 ### Layer 1 — `docs/product-boundary.md` — Capability brochure body (SWORD)
 
 Procurement reads this. Opens affirmatively: *"Nomad delivers the following capabilities under the following accountability model..."* Leads with:
-- Hermes BYOK as cryptographic-sovereignty differentiator
+- Kondukt BYOK as cryptographic-sovereignty differentiator
 - RAOs as auditability moat
 - Operational-sovereignty retention (ÖBB executes, Nomad recommends) as the sword that incumbents (Nexxiot, Knorr-Bremse, Wabtec, Konux) cannot match in six months
 - Phase 1 → Phase 2 progression as a contractual roadmap, not a future ask
@@ -1070,7 +1070,7 @@ Procurement reads this. Opens affirmatively: *"Nomad delivers the following capa
 
 Procurement reads this AND legal validates. **Positive enumeration** of operator duties (not exclusion-based) with named ÖBB roles, verification mechanisms, failure-mode owners. Defends against the **§ 1313a ABGB / Erfüllungsgehilfe trap** — Austrian civil code defaults to *inclusion* of sub-performers in the contracting party's responsibility unless explicitly carved out. Silence = inclusion under ABGB.
 
-Third-party components (Hailo runtime, OS, key-management lib) get explicit treatment — flow-down liability to suppliers OR explicit ÖBB-acceptance documentation. The Hermes BYOK story helps for keys (demonstrably outside Erfüllungsgehilfe chain), doesn't help for the inference stack.
+Third-party components (Hailo runtime, OS, key-management lib) get explicit treatment — flow-down liability to suppliers OR explicit ÖBB-acceptance documentation. The Kondukt BYOK story helps for keys (demonstrably outside Erfüllungsgehilfe chain), doesn't help for the inference stack.
 
 Co-authored: Winston drafts legal precision; Mary drafts operational language; one document, two hands.
 
@@ -1109,7 +1109,7 @@ The CRA-readiness tabletop exercise simulates the regulatory incident-response p
 
 ### Scenario (advisory-only context)
 
-**"Hermes recommended an action that a Disponent followed via their existing system; the resulting HAFAS state is wrong. Who is accountable — Nomad's recommendation engine or the human's execution? Where does the audit trail live? What does the 24h NIS2 clock say? What does CRA reporting require?"**
+**"Kondukt recommended an action that a Disponent followed via their existing system; the resulting HAFAS state is wrong. Who is accountable — Nomad's recommendation engine or the human's execution? Where does the audit trail live? What does the 24h NIS2 clock say? What does CRA reporting require?"**
 
 The scenario exercises the CRA + NIS2 + ECM trail intersection AND the ambiguity inherent in advisory-only: did the recommendation cause the wrong outcome, or did the operator's execution?
 

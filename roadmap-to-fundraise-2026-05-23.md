@@ -33,13 +33,13 @@
 *Can run in parallel with Phase 1. Must be complete before PoC goes live.*
 
 - [ ] **#7 Complete platform architecture document**
-  Run `bmad-create-architecture` → `platform/architecture.md`. Winston resolves 5 open decisions: onboard edge RTO, Hermes intent disambiguation rules (FR31), MQTT broker identity + failover, schema evolution strategy post-v1.0.0, Conductor App native wrapper.
+  Run `bmad-create-architecture` → `platform/architecture.md`. Winston resolves 5 open decisions: onboard edge RTO, Kondukt intent disambiguation rules (FR31), MQTT broker identity + failover, schema evolution strategy post-v1.0.0, Conductor App native wrapper.
 
 - [ ] **#8 Complete epics and stories for Phase 2**
   Run `bmad-create-epics-and-stories` → `platform/epics.md`. 4 epics: Conductor App, Depot Briefing Interface, Fleet Manager AI Interface, Rail MCP Server. Requires architecture complete first.
 
 - [ ] **#9 Run pre-story technical spikes**
-  Four spikes before build: (1) Hailo-10H load test — sub-5s P99 under concurrent load; (2) pgvector P99 — <500ms semantic search SLA; (3) Hermes spikes ×4 — intent disambiguation, BYOK key rotation, cost simulator, fallback; (4) Dismissal arbitration spike — two-stage loop mechanics.
+  Four spikes before build: (1) Hailo-10H load test — sub-5s P99 under concurrent load; (2) pgvector P99 — <500ms semantic search SLA; (3) Kondukt spikes ×4 — intent disambiguation, BYOK key rotation, cost simulator, fallback; (4) Dismissal arbitration spike — two-stage loop mechanics.
 
 - [ ] **#10 Build and deploy Phase 2 platform for PoC**
   Implement 4 epics on 3 PoC consists. Must pass PRD success criteria: Conductor App <5s P95, ECM audit trail 100% write success, pgvector P99 <500ms, Fleet Manager query <3s P95.

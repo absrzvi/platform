@@ -199,10 +199,10 @@ UI flow:
 5. Record written to PostgreSQL
 6. Incoming Disponent loads Fleet Manager → handover summary surfaced at top of triage view
 
-Rail MCP Server: add `get_shift_handover(shift_id)` tool so Hermes can answer "what did the last shift leave me?"
+Rail MCP Server: add `get_shift_handover(shift_id)` tool so Kondukt can answer "what did the last shift leave me?"
 
 ### Operational State Rule
-All operational state (active incidents, acknowledged alerts, assigned faults) must live in PostgreSQL — never in React component state or Hermes conversation memory. Every acknowledgement and status change is a server-side write. This is a hard architectural constraint.
+All operational state (active incidents, acknowledged alerts, assigned faults) must live in PostgreSQL — never in React component state or Kondukt conversation memory. Every acknowledgement and status change is a server-side write. This is a hard architectural constraint.
 
 ### Cross-session AI conversation handover
 Out of scope for PoC. Decision logged.
