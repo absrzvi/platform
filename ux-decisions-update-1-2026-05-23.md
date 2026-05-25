@@ -1,47 +1,20 @@
-# UX Decisions — Update 1 (Post Role Research)
+# UX Decisions — Update 1 (Post Role Research) — Landside
 **Date:** 2026-05-23
 **Trigger:** ÖBB careers page role research — confirmed and updated prior UX decisions
-**Supersedes sections of:** ux-decisions-2026-05-23.md
+**Scope:** Landside surfaces only. Conductor App updates live in `oebb-brain/ux-decisions-update-1-2026-05-23.md`.
 
 ---
 
-## What the Research Confirmed (no changes needed)
+## What the Research Confirmed (landside, no changes needed)
 
-- Conductor App one-handed design, 56dp tap targets — confirmed by moving-through-coaches reality
-- Full-screen alert takeover for severity 1 — confirmed
 - Depot role-filtered single feed (not tabs) — confirmed: ECM 1 and ECM 4 are formally separate specialisations
 - Two-depth-level model (feed → detail) — confirmed: sign-off is a regulatory act requiring deliberate affordance
 
 ---
 
-## UX Changes — Five Specific Updates
+## UX Changes — Three Specific Updates
 
-### 1. Conductor App — Departure Clearance (replaces prior decision)
-
-**Before:** Hold/double-tap gesture as standalone deliberate action.
-
-**After:** Sequential checklist → hold-to-confirm final step.
-
-**Why:** Conductors already run brake tests and dispatch procedures sequentially — these are procedural, sequential, safety-adjacent tasks, not single-moment decisions. Collapsing a checklist into a tap loses the procedural structure the conductor already operates within.
-
-**Wireframe spec:**
-```
-Departure Clearance flow:
-  [ ] Brake test confirmed        ← tap to check
-  [ ] All doors closed            ← auto-populated from vision pipeline
-  [ ] Dispatch comms complete     ← tap to check
-  ─────────────────────────────
-  [  HOLD TO CONFIRM DEPARTURE  ] ← active only when all steps checked
-                                    3-second hold, haptic pulse, visual fill
-```
-- Steps auto-populated where sensor data available (doors)
-- Manual confirm where no sensor (brake test, dispatch comms)
-- Hold-to-confirm button inactive until all steps checked
-- Full-screen confirmation state after hold completes
-
----
-
-### 2. Fleet Manager — Triage Entry State (update to prior decision)
+### 1. Fleet Manager — Triage Entry State (update to prior decision)
 
 **Before:** Triage showed operational alert + vehicle status.
 
@@ -69,7 +42,7 @@ Disruption card in triage:
 
 ---
 
-### 3. Control Centre — Relay Card Component (new component, not in prior spec)
+### 2. Control Centre — Relay Card Component (new component, not in prior spec)
 
 **Before:** Control Centre designed for generic landside operator.
 
@@ -98,25 +71,7 @@ Relay Card component:
 
 ---
 
-### 4. Conductor App — Shift-Aware Density Reduction (new behaviour)
-
-**Before:** Static UI density throughout shift.
-
-**After:** After configurable threshold, UI shifts to higher-contrast, lower-density mode.
-
-**Why:** 10.5-hour shifts. Cognitive capacity differs between hour 1 and hour 9. Not a warning — passive environmental adaptation.
-
-**Behaviour spec:**
-- Default threshold: 7 hours into shift
-- Shift start time set at login (conductor taps "Start Shift")
-- After threshold: reduce ambient data density — hide secondary metrics, increase font weight, increase contrast ratios
-- Full-screen alerts unaffected — always maximum intensity
-- Threshold configurable in settings (6h / 7h / 8h / off)
-- No visible indicator that density has changed — silent adaptation
-
----
-
-### 5. Depot Briefing — ECM 1 Authorisation as Blocking State (update to prior decision)
+### 3. Depot Briefing — ECM 1 Authorisation as Blocking State (update to prior decision)
 
 **Before:** ECM Manager sign-off was one of several status items on vehicle card.
 
@@ -151,25 +106,16 @@ Blocking state renders:
 
 ---
 
-## New Persona Accountability Model (Saga)
+## Landside Persona Accountability Model (Saga)
 
 Each persona carries a specific kind of accountability. Design question for each interface: *what decision are they accountable for, and does our interface help them make it defensibly?*
 
 | Persona | Accountability | Interface must enable |
 |---|---|---|
-| Conductor (Zugbegleiter) | Safety judgment — sole decision-maker onboard | Confirmatory before advisory; earned trust over first 10 shifts |
 | Dispatcher (Fahrdienstleiter) | Passenger communication + incident coordination | Plain-language relay, rapid crisis navigation |
 | Fleet Coordinator (Disponent) | Cost management through fleet deployment | Cost-consequence-first data hierarchy, 48-72h planning horizon |
 | ECM Manager (ECM 1) | Regulatory compliance — EU Directive liability | Defensible audit trail, blocking authorisation flow |
 | Technicians (ECM 4) | Domain-specific fault resolution | Role-filtered depth, structured ACK record |
-
-### Conductor onboarding model
-No existing digital tools = trust must be earned, not assumed.
-
-- First 10 shifts: confirmatory mode — "here's what you already know" (occupancy you can see, doors you can check)
-- Advisory mode earned after demonstrated accuracy — conductor sees the system was right about things they already knew
-- Integration with existing procedures (brake test, dispatch) must add zero friction — this is the credibility gate
-- Advisory layer (LLM recommendations) only trusted after confirmatory layer is established
 
 ### Fleet Manager planning horizon
 - Disponent makes 48–72h deployment decisions, not just real-time response
@@ -196,7 +142,6 @@ No existing digital tools = trust must be earned, not assumed.
 | ECM trail completeness | Log IntentPacket time vs docking time vs ECM open time vs sign-off time | >80% pre-arrival review rate |
 | Disponent decision latency | Instrument time-to-decision for redeployment calls, before/after | Measurable reduction |
 | Audit trail usage correlation | Sign-off timestamp vs briefing-read timestamp — did reading change the outcome? | Qualitative + quantitative |
-| Conductor additive behaviour | What do conductors do additionally that surfaces upward? | Catalogue new workflows |
 
 ### Rollout decision room — updated
 **Current:** Roland Ruiz (operations) + Martin Lerch (IT)

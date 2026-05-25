@@ -1,0 +1,4 @@
+# Claude Code local workspace scaffolding — not project artifacts
+.claude/
+_bmad/
+_bmad-output/

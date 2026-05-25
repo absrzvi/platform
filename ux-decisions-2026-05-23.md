@@ -1,40 +1,11 @@
-# UX Decisions — Party Mode Session
+# UX Decisions — Landside Platform
 **Date:** 2026-05-23
 **Participants:** Freya (UX), Saga (Analyst), Mary (Business Analyst)
+**Scope:** Landside surfaces only. Conductor App decisions live in `oebb-brain/ux-decisions-2026-05-23.md`.
 
 ---
 
-## Q1 — Conductor App: Degraded Sensor State
-
-### Design Approach
-Coverage gap framing, not system status framing. Never show silence — always show system state.
-
-### Train Schematic Coverage Indicator (persistent header)
-- **Green segment** — inference running, confidence above threshold
-- **Amber segment** — partial coverage (one camera offline, SNMP slow), inference running but flagged
-- **Red segment** — blind spot, no inference for this segment
-- Segment pulses once on state change, then settles. No banner. No push interruption.
-
-### Tap-to-Detail (one screen, no nav depth)
-"Car 4 — camera VLAN 5 unresponsive. Occupancy estimate unavailable. Last known: 68% (12 min ago)."
-
-### Stale IntentPacket Rendering
-- Fresh packet: normal card rendering
-- Approaching expiry: timestamp label "Recommendation (42s ago)"
-- Expired (`expires_at` passed): muted card, "Expired — conditions may have changed." Card stays visible — do not delete or suppress.
-
-### Must Specify Before Story
-1. Confidence score thresholds — what value moves segment amber vs red? ⚠️ OPEN DECISION
-2. Staleness rendering spec — visual treatment for expired vs fresh cards
-3. Tap-to-detail copy per degraded source type (camera, SNMP, APC)
-4. Explicit product decision: no push interruption for degradation — passive indicators only
-
-### Psychology (Saga)
-Conductor's deepest fear: being wrong in public. Silence reads as green — that's the danger. The system is their data alibi. Advisory with qualifier ("Occupancy estimate: moderate — camera unavailable, door counts only") preserves their judgment. They still decide, but they know they're deciding with partial data.
-
----
-
-## Q2 — Depot Briefing Interface: Four Roles, One Interface
+## Q1 — Depot Briefing Interface: Four Roles, One Interface
 
 ### Design Approach
 One information model, role-filtered presentation. Not tabs — progressive disclosure by role.
@@ -94,7 +65,7 @@ One briefing document generated per train per depot arrival. Role lens applied c
 
 ---
 
-## Q3 — Fleet Manager AI Interface: Task Model + Three Entry States
+## Q2 — Fleet Manager AI Interface: Task Model + Three Entry States
 
 ### Three Modes
 
@@ -156,8 +127,7 @@ The depot accountability ACK trail makes it credible — every fault has a times
 
 | # | Decision | Owner | Blocker for |
 |---|---|---|---|
-| 1 | Confidence score threshold for amber vs red coverage segment | Abbas + data science | Conductor App story |
-| 2 | Depot card sort order per role | ECM Manager sign-off | Depot Briefing story |
-| 3 | Fleet Manager pre-service time window | ÖBB ops schedule | Fleet Manager story |
-| 4 | Fleet Manager entry state machine | Abbas | Fleet Manager story |
-| 5 | Incident modal — dismiss vs resolve behaviour | Abbas | Fleet Manager story |
+| 1 | Depot card sort order per role | ECM Manager sign-off | Depot Briefing story |
+| 2 | Fleet Manager pre-service time window | ÖBB ops schedule | Fleet Manager story |
+| 3 | Fleet Manager entry state machine | Abbas | Fleet Manager story |
+| 4 | Incident modal — dismiss vs resolve behaviour | Abbas | Fleet Manager story |
