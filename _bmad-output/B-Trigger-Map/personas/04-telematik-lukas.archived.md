@@ -1,3 +1,23 @@
+# ⚠️ ARCHIVED — Lukas Persona Retired 2026-05-25
+
+> **This persona file is retired.** Lukas was an artificial separation — the Teil-Projektleitung Telematik role belongs to Roland Ruisz, who already wears the Fleet Manager hat. One person, one role, two programme hats (Cityjet DOSTO Neu + Enzo) — not two personas.
+>
+> **Where Lukas's drivers live now:** merged into the Roland persona file (`01-disponent-stefan.md` — filename retained for now, see design log on Stefan→Roland rename). Specifically:
+> - Cross-domain visibility (W1/W2) → Roland W3, W6 (multi-subsystem Live Board + cross-subsystem correlation)
+> - Single-session vendor warranty (W1) → Vision tier (warranty *recovery workflow* descoped from MVP; warranty *detection* via Live Board + Kondukt Vendor meeting prep skill)
+> - OTA rollout monitoring (W3) → Vision tier (OTA management out of MVP; firmware drift moved to ECM module)
+> - Lastenheft procurement export (W4) → Vision tier (unchanged)
+> - Fear F1 (vendor lawyer picks apart timestamps) → Roland's Provenance Replay archive integrity concern
+> - Fear F2 (Kondukt wrong, Roland wears it) → Roland F1 (LLM-hallucination protection via constitution-as-contract)
+> - Fear F3 (Probebetrieb cycle no overlap) → de-scoped (warranty itself out of MVP)
+> - Fear F4 (loss of vendor portal access) → Roland W5 (Kondukt allowlisted internet egress to vendor portals + Kanban detail card vendor portal deep-link)
+>
+> **Why archived rather than deleted:** trail preservation. The original Lukas framing was the basis for scenarios 06 + 07 (now retired from MVP) — those scenarios reference this persona file historically. Archive keeps the trail; rationale header makes the retirement loud.
+>
+> **Original content below preserved for reference only — not the current model.**
+
+---
+
 # Persona Detail: Lukas the Teil-Projektleitung Telematik
 
 **Priority:** Primary (commercial wedge) — owns vendor warranty leverage; non-obvious-to-competitors persona
