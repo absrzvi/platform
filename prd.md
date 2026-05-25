@@ -30,7 +30,7 @@ classification:
 
 ÖBB rail operators — conductors, depot technicians, fleet coordinators, dispatchers, and ECM managers — currently make high-stakes decisions with fragmented, delayed, or missing information. The platform closes that gap across all five roles, serving two fundamentally distinct modes:
 
-**Live decision support** — conductors, dispatchers, and fleet coordinators acting under time pressure receive contextual, actionable information at the moment of decision, with no internet dependency. LLM inference runs onboard over the train's L2 network (Hailo-10H M.2), drawing from live VLAN sensor data. No cloud round-trip. No WAN latency. No blackout in a tunnel. When inference is unavailable or degraded, the system signals its state explicitly — the conductor always has last call, and silence is never presented as green.
+**Live decision support** — conductors, dispatchers, and fleet coordinators acting under time pressure receive contextual, actionable information at the moment of decision, with no internet dependency. LLM inference runs onboard over the train's L2 network (Hailo-10H M.2), drawing from live data probed from the Stadler Diagnostic system (stadler IM). No cloud round-trip. No WAN latency. No blackout in a tunnel. When inference is unavailable or degraded, the system signals its state explicitly — the conductor always has last call, and silence is never presented as green.
 
 **Post-incident forensics and compliance evidence** — ECM managers and technicians receive a pre-arrival fault brief, a role-filtered maintenance view, and an append-only audit trail anchored to EU Directive 2019/779. ECM sign-off records are append-only — corrections are new rows with a `supersedes_id`, `technician_id` is bound to ÖBB SSO, not a local session. When connectivity is unavailable for an extended period, the audit trail queues locally and syncs on reconnect. The platform does not replace regulatory judgment — it makes it legally defensible.
 
@@ -60,7 +60,7 @@ Conductors have no existing digital decision support tools. This platform is ent
 
 ### Project Classification
 
-- **Project Type:** Context-differentiated decision-support platform — mobile for exception handling under time pressure; web dashboard for situational awareness and planning; AI agent interface for fleet analytics
+- **Project Type:** Context-differentiated decision-support platform — mobile for exception handling under time pressure; web dashboard for situational awareness and planning; AI agent interface for fleet analytics/reports and intellegence information
 - **Domain:** Rail operations — safety-adjacent, regulated (EU ECM Directive 2019/779, NIS2, GDPR)
 - **Complexity:** High + state-sync — three independent state machines (offline mobile, edge inference, regulated audit trail) must stay consistent under degraded connectivity
 - **Project Context:** Greenfield — new product built on oebb-agent Phase 1 infrastructure (Hailo-8 vision pipeline, PostgreSQL/FastAPI/React stack)
@@ -471,9 +471,11 @@ Three interfaces, delivered in priority order:
 | MQTT broker | IntentPacket transport, QoS 1, retain=True | Spec frozen | `oebb/{train_id}/intent` |
 | Hailo-8 (vision) | Local M.2 inference — detection, tracking, occupancy | Phase 1 built | Always-on |
 | Hailo-10H (LLM) | Local M.2 inference — safety queries, briefings | Phase 2 greenfield | Bursty; sub-5s target pending spike |
+| Integration with Stadler Diagnostics systems for alarms. 
 | VLAN sources | CCTV (5), APC (8), SNMP (7), PIS/FIS (3), Reservations (6), Energy (12), ZFR (2) | Phase 1 pollers built | ZFR read-only |
 | Rail MCP Server | HTTP MCP endpoint — 9 tools for Hermes | Spec frozen | New subpackage `rail-mcp-server/` |
 | Hermes (BYOK) | LLM orchestration agent runtime | Designed, not built | Nous Research, MIT licence |
+| Frontend wrapper for Hermes for the Fleet manager/dispatcher and anyone using the landside portal
 | BOOM (work orders) | Work order integration for depot | **Descoped for PoC** | Structured export/copy for manual entry |
 | pgvector | Semantic search over `incident_summary` embeddings | Requires migration spike + P99 SLA confirmation | Fallback: keyword ranking |
 | ÖBB HAFAS | Timetable data via `get_hafas_timetable` Rail MCP tool | Required for Fleet Manager | 48h horizon |
@@ -588,14 +590,15 @@ MQTT QoS 1 + sync-then-truncate requires explicit partition handling. If edge lo
 
 | System | Integration type | PoC status | Fleet gate |
 |---|---|---|---|
-| ÖBB SSO (IdP) | Identity for ECM sign-off + role-based access | Required for ECM compliance | Per-operator SAML bridge — architecture decision pre-fleet |
+| ÖBB SSO (IdP) | Identity for ECM sign-off + role-based access | Required for ECM compliance | Per-operator SAML bridge — architecture decision pre-fleet | Consider using Keycloak
 | MQTT broker | IntentPacket transport, QoS 1, retain=True | Onboard only | **Blocking pre-fleet:** broker identity, failover, and multi-train topic isolation must be specified |
 | Docker registry | Edge OTA — container pull during depot dwell | PoC: manual or shared | **Blocking pre-fleet:** private registry, credential rotation ownership, and access model must be in contract template |
 | Rail MCP Server | HTTP MCP endpoint — 9 tools for Hermes | Spec frozen, new subpackage | Required for Fleet Manager |
 | Hermes (BYOK) | LLM orchestration, operator-owned API keys | Designed, not built | BYOK cost simulator required before fleet sales |
 | BOOM (work orders) | Depot work order integration | Descoped — structured JSON export only | API contract required from ÖBB IT before integration stories |
 | pgvector | Semantic search over incident_summary embeddings | Spike + P99 confirmation required | Fallback: keyword ranking |
-| ÖBB HAFAS | Timetable data via Rail MCP tool | Required for Fleet Manager | 48h horizon |
+| Stadler Diagnostic and IM system on train
+| ÖBB HAFAS | Timetable data via Rail MCP tool | Required for Fleet Manager | 48h horizon | - Require a spike after integration with Stadler Diagnostic and IM system integration is done, to see if all required info  can be retrieved onboard.
 | Hailo-8 (vision) | Local M.2 — detection, tracking, occupancy | Phase 1 built | Always-on |
 | Hailo-10H (LLM) | Local M.2 — safety queries, briefings | Phase 2 greenfield | Sub-5s spike gate |
 
@@ -747,7 +750,7 @@ The real innovation is not versioning — it is rollback semantics for safety-cr
 | Hailo-10H load test — sub-5s P99 under concurrent vision | Before Conductor App LLM stories | Fallback to heuristic; advisory mode deferred |
 | pgvector P99 <500ms under realistic incident volume | Before Fleet Manager search stories | Keyword fallback only; semantic search deferred |
 | Fleet Manager dismissal signal arbitration | Before dismissal queue stories — spike must define decision tree, queue persistence, failure modes | Feature deferred to post-PoC |
-
+| HAFAS integration required or can we retrieve all the info from the onboard Stadler IM
 ---
 
 ### Risk Mitigation Strategy
@@ -779,6 +782,7 @@ The following decisions are deferred to the architecture phase. They are not PoC
 | MQTT broker identity and failover | Broker host, auth model, and multi-train topic isolation strategy for fleet deployment. Flagged in §6 as blocking pre-fleet. Architecture must define the broker topology and failover behaviour before multi-train stories begin. | Pre-fleet gate; confirm identity for PoC before first MQTT story |
 | Schema evolution strategy | IntentPacket frozen at v1.0.0 for PoC. Post-PoC options: one-shot depot-dwell deploys, schema version field with forward/backward adapters, or hot-standby edge for A/B rollover. Architecture decision required before any schema change ships. | Post-PoC; must not block PoC |
 | Conductor App native wrapper | PWA via onboard AP for PoC. If native device features (persistent background sync, native push, haptic APIs) are required post-pilot, Capacitor wrapper evaluated. Architecture decision pending pilot feedback. | Post-pilot |
+| Fleet Manager AI interface App frontend wrapper reequired over Hermes agent backend.
 
 ---
 
@@ -846,6 +850,7 @@ The following must be confirmed before pilot go-live. Martin Lerch owns sign-off
 |---|---|---|
 | SYS2 thermal envelope | Dual-chip concurrent load (Hailo-8 always-on + Hailo-10H bursty) must not exceed thermal limits under sustained operation — confirmed via load test | **Open — spike required** |
 | Concurrent VLAN headroom | SYS2 must sustain simultaneous polling of VLAN 5 (CCTV), VLAN 7 (SNMP), VLAN 8 (APC), VLAN 3 (PIS/FIS) without packet loss during peak inference | **Open — to be measured** |
+| Integration with Stadler IM and retrieving all required information.
 | MQTT broker identity | Broker host, auth model, and failover behaviour confirmed for multi-train deployment | **Open — pre-fleet gate** |
 | Docker registry | Private registry access confirmed; credential rotation ownership agreed | **Open — pre-fleet gate** |
 
