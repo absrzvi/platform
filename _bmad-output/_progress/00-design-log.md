@@ -97,11 +97,30 @@
 - **Pre-pilot blocker: Probebetrieb cycle overlap** — confirm with Lukas's programme team before pilot manday 1 (affects scenarios 06, 07 evidentiary status)
 - **Pre-pilot blocker: ÖBB SSO IdP federation live by pilot manday 1** — affects every scenario (login pre-condition) + scenario 05 (Renate review)
 - **Pre-pilot blocker: DEFER reason taxonomy** — ECM Manager sign-off needed (affects scenario 04)
+- **Roland queue: F3 scope question** — does Renate's F3 (Phase 2 pre-emption concern) cover the ECM-4 maintenance contractor chain, or is it purely about internal-ÖBB pre-emption? Mary flagged 8–15 subcontractor QA manuals as a missed stakeholder. The invariant-noun label ("Audit record — advisory/authoritative mode") mitigates this regardless, but the answer determines whether the Phase 2 cutover runbook needs contractor-specific comms artefacts. Not blocking — confirm at next Roland touchpoint.
+- **Phase 2 cutover runbook stub** — needed in planning-artifacts before Phase 2 trust-criteria sign-off event. Covers Schienen-Control letter, ECM audit committee briefing memo, contractor handover-packet template update, doctrine paragraph on "authoritative from date X" semantics. Tracked in planning-artifacts, not design-artifacts. Owner: TBD post-MVP launch.
 - **Phase 4 reference reading list** — see decision-log entries for hermes-workspace and hermes-agent patterns to lift
 
 ---
 
 ## Decision Log
+
+### 2026-05-25 — Shadow record label → invariant-noun label + enum schema (party-mode pass)
+- **Context:** Prior lock in `05.1-audit-export-view` (commit 29f58b3) made "Shadow record (companion to paper)" non-removable in MVP, with Phase 2 transition framed as a "single config flag" flip to "Authoritative record." Checkpoint review (party mode) stress-tested this with Saga, Winston, Mary, Mimir.
+- **Diagnosis converged across 4 voices:**
+  - Saga: "Shadow record" leaks into committee minutes, procurement language, contractor habit during MVP — relabelling becomes a contract-amendment cycle, not a flag flip
+  - Winston: "single config flag" was an architecturally false slogan — hash chain means historical rows must keep their original label forever; Phase 2 is "authoritative from date X forward," not "platform becomes authoritative"
+  - Mary: ECM-4 maintenance contractor chain (8–15 subcontractor QA manuals) was the missed stakeholder — full vocabulary relabel = 2–4 months of Renate's attention
+  - Mimir: schema must be enum-in-canonical + string-in-renderer (option c); enum bound by HMAC, string lives in `labelFor(record_type, locale)`. Option (b) — full string in HMAC bytes — is operationally impossible without breaking the chain
+- **Choice (option 1 from convergence):**
+  - **Label changed:** "Audit record — advisory mode (paper sign-off is authoritative)" → "Audit record — authoritative mode." Noun invariant across modes; only the `— mode` sub-line changes at Phase 2.
+  - **Schema locked (Mimir option c):** `record_type` enum on the canonical row, values `"advisory"` / `"authoritative"`. Enum in HMAC bytes; human-readable string lives in renderer lookup. Per-row enum immutable.
+  - **Phase 2 flip:** write-side default change for *new* rows only. Historical advisory rows render as advisory forever, by chain integrity.
+  - **Phase 2 cutover runbook:** added to backlog as planning-artifacts work — Schienen-Control letter, audit-committee briefing, contractor handover-packet update, doctrine paragraph. Not code; not in design-artifacts.
+- **Confirmed prior to lock:** "Shadow record (companion to paper)" had not yet appeared in any external written communication — cheap-fix window still open. Saga's mandatory migration plan (overlap window + co-signed regulator memo) downgrades to optional given the invariant-noun label.
+- **Open question for Roland:** does F3 (Phase 2 pre-emption concern) cover the ECM-4 contractor chain, or is it purely internal-ÖBB? Affects whether the Phase 2 cutover runbook needs contractor-specific artefacts. Not blocking; queued for next Roland touchpoint.
+- **Reversibility:** Schema lock is a one-way door once Sprint 4 commits (changing `record_type` semantics after audit data accumulates invalidates the dataset). Label string is reversible (renderer lookup, one line). Lock the schema before Sprint 4.
+- **Revisit trigger:** Phase 2 trust-criteria sign-off event — verify cutover runbook is complete and the invariant-noun label is doing the F3 protection work in practice (operator habit, contractor manuals, audit-committee speech all still use "Audit record" as the noun).
 
 ### 2026-05-25 — Simplified Brief over Complete Brief
 - **Context:** Project has rich existing PRD + research; Complete brief would re-litigate settled decisions
@@ -157,8 +176,8 @@
   - **Q4 — Triage card sort order (01.1):** LOCKED — severity-banded (HIGH → MEDIUM → LOW), newest-first within band, LOW band capped at 5 with "Show more (N)". Sally + Mary converged independently. Evidence: Endsley/Vicente situation-awareness research on long-shift operators.
   - **Q5 — RAO visual treatment (01.5):** SPINE LOCKED — left-rail 3px in confidence-tier colour. Two variants flagged for Roland-test: (a) subtle background tint (Winston + Mimir favour, Sally argues against); (b) "Recommendation" badge (Mimir favours, Sally argues against). Three-way split on decoration; spine all three voices agreed on.
   - **Bonus pickup (Caravaggio):** "Log What You Did" as label alternative for "Mark executed" — plain-language, scans in <1s, possibly stronger than the current label across ALL RAO surfaces. Worth a Roland side-by-side test before locking permanently.
-- **Reversibility:** All five LOCKS are reversible (Mimir confirmed the LOW-confidence enum/policy is a one-line flip; visual treatment is a few utility classes; taxonomy is a config). The locks are the *current decision*, not architectural one-way doors.
-- **Revisit trigger:** Pilot Day-5 review with Roland — does the LOW-DISABLE behaviour match his Disponent intuition? Does item 6 of the modification taxonomy survive his redline? Are the visual variants in scope for Roland's first walkthrough?
+- **Reversibility:** All five LOCKS are reversible (Mimir confirmed the LOW-confidence enum/policy is a one-line flip; visual treatment is a few utility classes; taxonomy is a config). The locks are the *current decision*, not architectural one-way doors. **Caveat (added 2026-05-25, pre-mortem pass):** the `modification_distance` audit-schema field is a one-way door once Sprint 4 build commits — adding it after Phase 2 audit data has accumulated invalidates the dataset. Lock the field before Sprint 4 begins.
+- **Revisit trigger (revised 2026-05-25, pre-mortem pass):** **Day-21 OR LOW-rate threshold trip (>15% over 72h), whichever comes first** — not Day-5. Day-5 only measures whether Roland *recognises* the LOW-DISABLE behaviour; it does not measure whether the behaviour holds up at operational frequency. The pre-mortem identified classifier drift (8% → 30%+ LOW) as the highest-probability failure mode, and Day-5 is too early to see it. Day-5 walkthrough with Roland is still on the calendar as a *recognition check*, not as the revisit decision.
 
 ### 2026-05-25 — Rename internal "Hermes" agent → Kondukt (resolved)
 - **Context:** Our internal LLM co-pilot was called "Hermes" throughout PRD, commercial model, UX decisions, and Rail MCP Server spec. Nous Research owns "Hermes Agent" as a public project name (`NousResearch/hermes-agent`, 166k stars). Brand confusion was a concern for Roland Ruisz / Martin Lerch conversations and an anticipated IP question from Stadler/Siemens procurement ("what's the proprietary value beyond wrapping an OSS tool?")

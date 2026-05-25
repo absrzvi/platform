@@ -77,7 +77,7 @@ Trust criterion #3 (Renate sign-off) — earned. Phase 2 readiness composite mov
 - ✅ **Want W4:** Divergence-handling story she can present to her audit committee
 - ❌ **Fear F1:** Compliance theatre — the correction example is concrete, not hand-waved
 - ❌ **Fear F2:** Nomad-controlled identity — IdP identity field visible and traceable to ÖBB SSO
-- ❌ **Fear F3:** Phase 2 pre-emption — export labels rows "shadow record (companion to paper)" throughout
+- ❌ **Fear F3:** Phase 2 pre-emption — export labels rows "Audit record — advisory mode (paper sign-off is authoritative)" throughout. Noun invariant across Phase 2; only the *— mode* sub-line changes.
 
 **Business Goal:** Trigger Map Objective 5 (Phase 2 readiness composite — Renate sign-off criterion)
 

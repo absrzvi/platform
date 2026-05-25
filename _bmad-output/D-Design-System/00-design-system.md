@@ -178,11 +178,19 @@ When `confidence === "low"` on any RAO, the following grammar applies:
 | Card left-rail | Desaturates from severity colour to neutral-400 (chroma drains out) |
 | Justification block | `data-vouched="false"` — desaturated, prefixed "Unverified context:", no inline confidence chip |
 | "Mark executed" button | **DISABLED** (greyed, non-interactive, `aria-disabled="true"`). Tooltip: "Platform declines to vouch for low-confidence recommendations — use Modify to record your action." |
-| "Modify" button | The only interactive execution path. Pre-filled with the AI's draft per Victor's chess move (friction = "tap, adjust, commit," ~2s). |
-| Audit row | `decision_basis = "operator_modified_low_confidence"` |
+| "Modify" button | The only interactive execution path. Pre-filled with the AI's draft per Victor's chess move (friction = "tap, adjust, commit," ~2s). **Cursor pre-placed in the justification field** (not at end of draft) — forces a moment of attention before commit. |
+| Modify-on-LOW visual differentiation | Modify on LOW must visibly differ from Modify on HIGH (the same affordance + different intent collapses under time pressure into rubber-stamping). Treatment TBD — likely outline weight or accent on the justification field — but the differentiation itself is LOCKED. |
+| Audit row | `decision_basis = "operator_modified_low_confidence"` **plus `modification_distance`** (lexical or semantic diff between AI draft and committed text) — without this field, Victor's Phase 2 trust-signal argument collapses into noise |
 | Visual restraint (Caravaggio) | Hold-to-record progress ring stays full-saturation on the Modify button — restraint must look intentional, not broken |
 
 **Rationale (party mode 2026-05-25):** three independent paths converged on DISABLE — Saga (Renate's audit committee reads two row types more cleanly than three), John (Modify *is* the job on LOW), Victor (DISABLE produces the Phase 2 evidence dataset). Audit truth is preserved because Modify still records the action; the modification rate becomes the Phase 2 trust signal.
+
+**Pre-mortem guardrails (added 2026-05-25, advanced elicitation pass):**
+
+- **`modification_distance` is a required audit-schema field.** Recording *that* the operator modified is not enough; we need to record *how much*. Without it, a 1.8s tap-scan-commit rubber-stamp and a substantive rewrite both register as `operator_modified_low_confidence` and the Phase 2 trust dataset is junk. Add before Sprint 4 build — this is a one-way door we almost missed.
+- **LOW-rate is a first-class operational metric.** The DISABLE behaviour is calibrated to a low-frequency edge case (~8% of RAOs at design time). If LOW-rate exceeds **15% sustained over any 72-hour window**, the calibration assumption is broken — page the design team. At 30%+ LOW, the forced-Modify friction stops being signal and starts being theatre, and operators will route around it.
+- **Modify-on-LOW differentiation is non-negotiable.** Same gesture as Modify-on-HIGH = collapse under time pressure into the rubber-stamp pattern Saga's audit-truth argument was supposed to prevent.
+- **Cursor pre-placement in the justification field is a forcing function.** Small ergonomic detail, large signal-quality consequence. Spec-locked.
 
 ---
 
@@ -202,6 +210,44 @@ The defining trust-building gesture. Identical across MVP shadow and Phase 2 aut
 
 **Idempotency:** key generated at countdown initiation; safe retry semantics on 409.
 **Audit row:** captures the *gesture timing* (hold_started_at, countdown_completed_at, atomic_write_at) alongside the action.
+
+---
+
+## ECM Audit Row Schema (LOCKED 2026-05-25, party-mode pass)
+
+The canonical audit row written on every sign-off event. Hash-chained, HMAC-bound, IdP-identity-stamped, immutable. Corrections only via `supersedes_id`.
+
+### `record_type` enum (the Phase 2 transition contract)
+
+| Value | Renders as (EN) | When used |
+|---|---|---|
+| `"advisory"` | "Audit record — advisory mode (paper sign-off is authoritative)" | MVP — paper is legally authoritative; platform shadows + reconciles |
+| `"authoritative"` | "Audit record — authoritative mode" | Phase 2 — platform is legally authoritative, gated by five trust criteria sign-off |
+
+**LOCKED contract:**
+- The enum is in HMAC-canonicalized content. The string is **not** — strings live in a renderer lookup (`labelFor(record_type, locale)`).
+- Per-row enum is immutable. Phase 2 "flip" is a write-side default change for *new* rows; historical rows render per their own enum forever.
+- Noun is invariant across modes — "Audit record" survives the promotion across downstream surfaces (contractor QA manuals, Schienen-Control field reports, ÖBB-Einkauf procurement language). Only the `— mode` sub-line changes.
+
+### Why this matters (party-mode pass, 2026-05-25)
+
+The prior label was "Shadow record (companion to paper)" → "Authoritative record." Four agents converged on the diagnosis that:
+- Saga: "shadow" leaks into committee minutes, procurement language, contractor habit during MVP — relabelling becomes a contract-amendment cycle, not a flag flip
+- Winston: the "single config flag" framing was an architecturally false slogan — historical rows must stay on their original label forever (hash chain), so "promotion" is really "from date X forward"
+- Mary: ECM-4 maintenance contractor chain (8–15 subcontractor QA manuals) was the missed stakeholder — full relabel = 2–4 months of Renate's attention
+- Mimir: schema must be (c) enum-in-canonical + string-in-renderer; (b) string-in-canonical is operationally impossible without breaking the chain
+
+Rejected before any external leakage of the prior phrase.
+
+### Phase 2 cutover work (NOT a flag flip — tracked separately)
+
+Even with the invariant-noun label, Phase 2 promotion is comms work:
+- Formal letter to Schienen-Control explaining the mode change
+- Audit-committee briefing memo (Renate co-signs)
+- Update to the ECM-4 contractor handover packet template (the `— mode` line shifts; QA manuals citing "Audit record" do not need reissue)
+- A doctrine paragraph: "what 'authoritative from date X' means — historical advisory rows remain advisory by chain integrity"
+
+A Phase 2 cutover runbook stub belongs in the planning artifacts, not here. Flag = code; runbook = comms.
 
 ---
 

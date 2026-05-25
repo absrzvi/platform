@@ -65,7 +65,7 @@ At PoC scale: structured JSON copy-paste-ready is acceptable (BOOM integration d
 | W4 | Reconciliation queue view: shows divergence count per pilot week, reason codes, resolution status, persistent-divergence flag against Phase 2 readiness threshold. Renate sees the *operational reality*, not a sanitised summary. |
 | F1 | Correction example is in the demo script for pilot manday 15. Pre-scripted, not improvised. |
 | F2 | IdP integration is a pre-pilot blocker — ÖBB SSO IdP federated by pilot manday 1. Audit rows reject any non-IdP-bound identity. |
-| F3 | Every export and reconciliation surface labels rows: *shadow record (companion to paper)* in MVP; pre-emptive language (*authoritative*, *of record*) is forbidden until Phase 2 commercial release. |
+| F3 | Every export and reconciliation surface labels rows: *Audit record — advisory mode (paper sign-off is authoritative)* in MVP; pre-emptive language (*authoritative*, *of record*) is forbidden until Phase 2 commercial release. Noun "Audit record" is invariant across MVP and Phase 2; only the *— mode* sub-line changes. Schema-locked via `record_type` enum (`"advisory"` / `"authoritative"`) on the canonical row — see design system → ECM Audit Row Schema. (Updated 2026-05-25 from prior phrase "shadow record (companion to paper)" — party-mode pass; see design log entry.) |
 | F4 | Export schema documented. Post-pilot integration target (BOOM or successor) named in Phase 2 commercial proposal. Schema designed to be ingest-able by a documented standard format. |
 
 ---
