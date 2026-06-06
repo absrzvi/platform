@@ -1,6 +1,19 @@
 # CLAUDE.md — Platform (Landside) Guidelines
 
-> **Workspace scope:** Landside fleet operations platform — Fleet Manager AI Interface, Depot Briefing PWA, Telematics control board, Rail MCP Server, ECM audit trail, Kondukt BYOK integration.
+> ⚠️ **RETIREMENT NOTICE (2026-06-06, oebb-brain ADR-007).** This workspace is being **retired and merged
+> into `control-centre/`** (in the `oebb-brain` monorepo). The three-tier topology collapsed to **two tiers**;
+> `platform/` no longer exists as a separate product. Its best parts — the **BYOK harness** (Kondukt LLM,
+> `constitution.md`, skill registry, Rail MCP server, allowlisted egress, **Recommendation Provenance Replay
+> archive**), the **Live Board** (fleet map + per-subsystem health), and the operator-loop UX — are **absorbed
+> into `control-centre/`'s "harness plane."** Decisions that changed in the merge: the ECM ack is now the
+> **D13 brain-canonical** model (the shadow-vs-paper + Phase-2-authoritative story **dies**); the Kondukt LLM
+> is relaxed to **T2 (draft-actions-for-human-one-click-commit)**, not autonomous. **Migration rule: the
+> DESIGN + runtime contracts move; the React-19 code does NOT** (the target is React-18 + `shared-frontend/`).
+> Treat this repo as a **read-only design reference** — do not start new build here. Authoritative spec:
+> `oebb-brain/ADR-007-landside-consolidation-control-centre-harness.md`. This repo stays until the IntentPacket
+> schema re-freeze ack lands (the open `INBOX-intent-packet-prefreeze-change-2026-06-06.md` loop).
+
+> **Workspace scope (HISTORICAL — see retirement notice):** Landside fleet operations platform — Fleet Manager AI Interface, Depot Briefing PWA, Telematics control board, Rail MCP Server, ECM audit trail, Kondukt BYOK integration.
 >
 > **Companion workspace:** `C:\Users\AbbasRizvi\Documents\oebb-brain\` owns the onboard brain — Hailo inference, Conductor App PWA, IntentPacket schema and emission, edge resilience. Landside consumes IntentPackets from the brain; the brain does not consume landside output.
 >
